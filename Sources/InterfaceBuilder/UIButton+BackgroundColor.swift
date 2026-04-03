@@ -13,11 +13,11 @@ extension UIButton {
 
     func setBackgroundColor(_ color: UIColor, forState controlState: UIControl.State) {
 
-        UIGraphicsBeginImageContext(CGSize(width: 1, height: 1))
-        UIGraphicsGetCurrentContext()?.setFillColor(color.cgColor)
-        UIGraphicsGetCurrentContext()?.fill(CGRect(x: 0, y: 0, width: 1, height: 1))
-        let colorImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 1, height: 1))
+        let colorImage = renderer.image { context in
+            color.setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 1, height: 1))
+        }
         setBackgroundImage(colorImage, for: controlState)
 
     }

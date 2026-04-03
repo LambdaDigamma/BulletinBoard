@@ -33,13 +33,7 @@ import UIKit
      * Set this value before presenting the bulletin. Changing it after will have no effect.
      */
 
-    @objc public var backgroundColor: UIColor = {
-        if #available(iOS 13.0, *) {
-            return .systemBackground
-        } else {
-            return .white
-        }
-    }()
+    @objc public var backgroundColor: UIColor = .systemBackground
 
     /**
      * The style of the view covering the content. Defaults to `.dimmed`.
@@ -268,13 +262,8 @@ extension BLTNItemManager {
     }
 
     /// Provides a default color for activity indicator views.
-    /// Defaults to .label on iOS 13 and .black on older systems.
     private var defaultActivityIndicatorColor: UIColor {
-        if #available(iOS 13.0, *) {
-            return .label
-        } else {
-            return .black
-        }
+        return .label
     }
 
     /**

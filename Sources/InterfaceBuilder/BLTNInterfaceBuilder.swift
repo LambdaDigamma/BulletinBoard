@@ -91,20 +91,28 @@ import UIKit
 
     @objc open func makeActionButton(title: String) -> BLTNHighlightButtonWrapper {
 
+        if #available(iOS 26, *), appearance.actionButtonImage == nil {
+            return makeGlassActionButton(title: title)
+        }
+
+        return makeSolidActionButton(title: title)
+
+    }
+
+    // MARK: - Private Action Button Builders
+
+    private func makeSolidActionButton(title: String) -> BLTNHighlightButtonWrapper {
+
         let actionButton = HighlightButton()
         actionButton.layer.cornerRadius = appearance.actionButtonCornerRadius
-        
-        if #available(iOS 13, *) {
-            actionButton.layer.cornerCurve = .continuous
-        }
-        
+        actionButton.layer.cornerCurve = .continuous
+
         if let actionButtonImage = appearance.actionButtonImage {
             actionButton.setBackgroundImage(actionButtonImage, for: .normal)
-            
         } else {
             actionButton.setBackgroundColor(appearance.actionButtonColor, forState: .normal)
         }
-        
+
         actionButton.setTitleColor(appearance.actionButtonTitleColor, for: .normal)
         actionButton.contentHorizontalAlignment = .center
 
@@ -117,6 +125,36 @@ import UIKit
           actionButton.layer.borderColor = color.cgColor
           actionButton.layer.borderWidth = appearance.actionButtonBorderWidth
         }
+
+        return wrapActionButton(actionButton)
+
+    }
+
+    @available(iOS 26, *)
+    private func makeGlassActionButton(title: String) -> BLTNHighlightButtonWrapper {
+
+        let actionButton = HighlightButton(type: .system)
+        actionButton.usesSystemHighlight = true
+
+        var config = UIButton.Configuration.prominentGlass()
+        config.title = title
+        config.baseBackgroundColor = appearance.actionButtonColor
+        config.baseForegroundColor = appearance.actionButtonTitleColor
+
+        let font = appearance.makeActionButtonFont()
+        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { container in
+            var updated = container
+            updated.font = font
+            return updated
+        }
+
+        actionButton.configuration = config
+
+        return wrapActionButton(actionButton)
+
+    }
+
+    private func wrapActionButton(_ actionButton: HighlightButton) -> BLTNHighlightButtonWrapper {
 
         let wrapper = BLTNHighlightButtonWrapper(button: actionButton)
         wrapper.setContentHuggingPriority(.defaultLow, for: .horizontal)
@@ -141,10 +179,7 @@ import UIKit
 
         let alternativeButton = UIButton()
         alternativeButton.layer.cornerRadius = appearance.alternativeButtonCornerRadius
-        
-        if #available(iOS 13, *) {
-            alternativeButton.layer.cornerCurve = .continuous
-        }
+        alternativeButton.layer.cornerCurve = .continuous
         
         alternativeButton.setTitle(title, for: .normal)
         alternativeButton.setTitleColor(appearance.alternativeButtonTitleColor, for: .normal)

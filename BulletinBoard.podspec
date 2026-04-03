@@ -11,12 +11,12 @@ Pod::Spec.new do |s|
   s.license      = { :type => "MIT", :file => "LICENSE" }
   s.author             = { "Alexis Aubry" => "me@alexaubry.fr" }
   s.social_media_url   = "https://twitter.com/_alexaubry"
-  s.ios.deployment_target = "11.0"
+  s.ios.deployment_target = "15.0"
   s.source       = { :git => "https://github.com/alexaubry/BulletinBoard.git", :tag => s.version.to_s }
   s.source_files  = "Sources/**/*"
   s.private_header_files = "Sources/Support/**/*.h"
   s.frameworks  = "UIKit"
   s.documentation_url = "https://alexisakers.github.io/BulletinBoard"
   s.module_name = "BLTNBoard"
-  s.swift_version = "5.0"
+  s.swift_version = "6.0"
 end

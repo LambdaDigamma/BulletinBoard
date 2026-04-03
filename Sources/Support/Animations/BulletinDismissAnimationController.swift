@@ -42,11 +42,7 @@ class BulletinDismissAnimationController: NSObject, UIViewControllerAnimatedTran
         snapshotActivityIndicator.rightAnchor.constraint(equalTo: snapshot.rightAnchor).isActive = true
         snapshotActivityIndicator.bottomAnchor.constraint(equalTo: snapshot.bottomAnchor).isActive = true
 
-        if #available(iOS 13.0, *) {
-            snapshotActivityIndicator.style = UIActivityIndicatorView.Style.large
-        } else {
-            snapshotActivityIndicator.style = .whiteLarge
-        }
+        snapshotActivityIndicator.style = .large
         snapshotActivityIndicator.color = .black
         snapshotActivityIndicator.isUserInteractionEnabled = false
 
