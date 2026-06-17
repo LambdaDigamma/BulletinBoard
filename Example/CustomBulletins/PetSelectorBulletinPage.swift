@@ -83,32 +83,11 @@ import BLTNBoard
 
     func createChoiceCell(dataSource: CollectionDataSource, isSelected: Bool) -> UIButton {
 
-        let emoji: String
-        let animalType: String
-
-        switch dataSource {
-        case .cat:
-            emoji = "🐱"
-            animalType = "Cats"
-        case .dog:
-            emoji = "🐶"
-            animalType = "Dogs"
-        }
+        let choice = choiceContent(for: dataSource)
 
         let button = UIButton(type: .system)
-        button.setTitle(emoji + " " + animalType, for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .semibold)
         button.contentHorizontalAlignment = .center
-        button.accessibilityLabel = animalType
-
-        if isSelected {
-            button.accessibilityTraits.insert(.selected)
-        } else {
-            button.accessibilityTraits.remove(.selected)
-        }
-
-        button.layer.cornerRadius = 12
-        button.layer.borderWidth = 2
+        button.accessibilityLabel = choice.title
 
         button.setContentHuggingPriority(.defaultHigh, for: .horizontal)
 
@@ -116,80 +95,122 @@ import BLTNBoard
         heightConstraint.priority = .defaultHigh
         heightConstraint.isActive = true
 
-        let buttonColor = isSelected ? appearance.actionButtonColor : .lightGray
-        button.layer.borderColor = buttonColor.cgColor
-        button.setTitleColor(buttonColor, for: .normal)
-        button.layer.borderColor = buttonColor.cgColor
+        applyChoiceAppearance(to: button, dataSource: dataSource, isSelected: isSelected)
 
         if isSelected {
-            next = PetValidationBLTNItem(dataSource: dataSource, animalType: animalType.lowercased(), validationHandler: completionHandler)
+            next = PetValidationBLTNItem(dataSource: dataSource, animalType: choice.title.lowercased(), validationHandler: completionHandler)
         }
 
         return button
 
     }
 
+    private func choiceContent(for dataSource: CollectionDataSource) -> (emoji: String, title: String) {
+        switch dataSource {
+        case .cat:
+            return ("🐱", "Cats")
+        case .dog:
+            return ("🐶", "Dogs")
+        }
+    }
+
+    private func applyChoiceAppearance(to button: UIButton, dataSource: CollectionDataSource, isSelected: Bool) {
+        if isSelected {
+            button.accessibilityTraits.insert(.selected)
+        } else {
+            button.accessibilityTraits.remove(.selected)
+        }
+
+        button.isSelected = false
+
+        let choice = choiceContent(for: dataSource)
+        if #available(iOS 26, *) {
+            applyClearGlassChoiceAppearance(to: button, choice: choice, isSelected: isSelected)
+        } else {
+            applyBorderedChoiceAppearance(to: button, choice: choice, isSelected: isSelected)
+        }
+    }
+
+    @available(iOS 26, *)
+    private func applyClearGlassChoiceAppearance(to button: UIButton, choice: (emoji: String, title: String), isSelected: Bool) {
+        var configuration = UIButton.Configuration.clearGlass()
+        configuration.title = choice.emoji + " " + choice.title
+        configuration.buttonSize = .large
+        configuration.cornerStyle = .capsule
+        configuration.titleAlignment = .center
+        configuration.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20)
+        configuration.baseForegroundColor = isSelected ? appearance.actionButtonColor : .label
+        configuration.automaticallyUpdateForSelection = false
+
+        var background = configuration.background
+        background.strokeColor = isSelected ? appearance.actionButtonColor : .tertiaryLabel
+        background.strokeWidth = isSelected ? 2 : 1
+        configuration.background = background
+
+        let font = UIFont.systemFont(ofSize: 20, weight: .semibold)
+        configuration.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { container in
+            var updated = container
+            updated.font = font
+            return updated
+        }
+
+        UIView.transition(with: button, duration: 0.18, options: [.transitionCrossDissolve, .allowUserInteraction]) {
+            button.backgroundColor = .clear
+            button.layer.borderWidth = 0
+            button.configuration = configuration
+        }
+    }
+
+    private func applyBorderedChoiceAppearance(to button: UIButton, choice: (emoji: String, title: String), isSelected: Bool) {
+        let buttonColor = isSelected ? appearance.actionButtonColor : UIColor.tertiaryLabel
+
+        button.configuration = nil
+        button.setTitle(choice.emoji + " " + choice.title, for: .normal)
+        button.setTitleColor(isSelected ? appearance.actionButtonColor : .secondaryLabel, for: .normal)
+        button.setTitleColor(isSelected ? appearance.actionButtonColor : .secondaryLabel, for: .selected)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .semibold)
+        button.backgroundColor = .clear
+        button.layer.cornerRadius = 27.5
+        button.layer.cornerCurve = .continuous
+        button.layer.borderColor = buttonColor.cgColor
+        button.layer.borderWidth = isSelected ? 2 : 1
+    }
+
     // MARK: - Touch Events
 
     /// Called when the cat button is tapped.
     @objc func catButtonTapped() {
-
-        // Play haptic feedback
-
-        selectionFeedbackGenerator.prepare()
-        selectionFeedbackGenerator.selectionChanged()
-
-        // Update UI
-
-        let catButtonColor = appearance.actionButtonColor
-        catButtonContainer?.layer.borderColor = catButtonColor.cgColor
-        catButtonContainer?.setTitleColor(catButtonColor, for: .normal)
-        catButtonContainer?.accessibilityTraits.insert(.selected)
-
-        let dogButtonColor = UIColor.lightGray
-        dogButtonContainer?.layer.borderColor = dogButtonColor.cgColor
-        dogButtonContainer?.setTitleColor(dogButtonColor, for: .normal)
-        dogButtonContainer?.accessibilityTraits.remove(.selected)
-
-        // Send a notification to inform observers of the change
-
-        NotificationCenter.default.post(name: .FavoriteTabIndexDidChange,
-                                        object: self,
-                                        userInfo: ["Index": 0])
-
-        // Set the next item
-
-        next = PetValidationBLTNItem(dataSource: .cat, animalType: "cats", validationHandler: completionHandler)
+        selectChoice(.cat)
     }
 
     /// Called when the dog button is tapped.
     @objc func dogButtonTapped() {
+        selectChoice(.dog)
+    }
 
-        // Play haptic feedback
+    private func selectChoice(_ dataSource: CollectionDataSource) {
 
         selectionFeedbackGenerator.prepare()
         selectionFeedbackGenerator.selectionChanged()
 
-        // Update UI
+        let selectedIndex: Int
+        switch dataSource {
+        case .cat:
+            selectedIndex = 0
+        case .dog:
+            selectedIndex = 1
+        }
 
-        let catButtonColor = UIColor.lightGray
-        catButtonContainer?.layer.borderColor = catButtonColor.cgColor
-        catButtonContainer?.setTitleColor(catButtonColor, for: .normal)
-        catButtonContainer?.accessibilityTraits.remove(.selected)
+        applyChoiceAppearance(to: catButtonContainer, dataSource: .cat, isSelected: selectedIndex == 0)
+        applyChoiceAppearance(to: dogButtonContainer, dataSource: .dog, isSelected: selectedIndex == 1)
 
-        let dogButtonColor = appearance.actionButtonColor
-        dogButtonContainer?.layer.borderColor = dogButtonColor.cgColor
-        dogButtonContainer?.setTitleColor(dogButtonColor, for: .normal)
-        dogButtonContainer?.accessibilityTraits.insert(.selected)
-
-        // Send a notification to inform observers of the change
+        let choice = choiceContent(for: dataSource)
 
         NotificationCenter.default.post(name: .FavoriteTabIndexDidChange,
                                         object: self,
-                                        userInfo: ["Index": 1])
+                                        userInfo: ["Index": selectedIndex])
 
-        // Set the next item
-        next = PetValidationBLTNItem(dataSource: .dog, animalType: "dogs", validationHandler: completionHandler)
+        next = PetValidationBLTNItem(dataSource: dataSource, animalType: choice.title.lowercased(), validationHandler: completionHandler)
     }
 
     override public func actionButtonTapped(sender: UIButton) {
