@@ -142,9 +142,11 @@ import UIKit
         config.baseForegroundColor = appearance.actionButtonTitleColor
 
         let font = appearance.makeActionButtonFont()
+        let titleColor = appearance.actionButtonTitleColor
         config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { container in
             var updated = container
             updated.font = font
+            updated.foregroundColor = titleColor
             return updated
         }
 
