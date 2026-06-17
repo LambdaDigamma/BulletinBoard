@@ -3,7 +3,7 @@ set -e
 
 MODULE_VERSION=$1
 OUTPUT=$2
-SWIFT_VERSION="5.1"
+SWIFT_VERSION="6.0"
 AUTHOR="Alexis Aubry"
 AUTHOR_URL="https://twitter.com/_alexaubry"
 MODULE_NAME="BLTNBoard"
@@ -11,7 +11,7 @@ COPYRIGHT="Copyright © 2017 - present $AUTHOR. Available under the MIT License.
 GITHUB_URL="https://github.com/alexaubry/BulletinBoard"
 GH_PAGES_URL="https://alexisakers.github.io/BulletinBoard"
 
-bundle exec jazzy \
+jazzy \
     --swift-version $SWIFT_VERSION \
     -a "$AUTHOR" \
     -u "$AUTHOR_URL" \

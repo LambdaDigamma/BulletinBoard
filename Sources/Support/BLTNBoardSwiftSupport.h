@@ -3,9 +3,7 @@
  *  Copyright (c) 2017 - present Alexis Aubry. Licensed under the MIT license.
  */
 
-// Workaround needed to allow static library usage through Cocoapods.
-// https://github.com/CocoaPods/CocoaPods/issues/7594
-// https://github.com/mxcl/PromiseKit/issues/825
+// Support both local and framework-style generated Swift headers.
 #if __has_include("BLTNBoard-Swift.h")
 	#import "BLTNBoard-Swift.h"
 #else

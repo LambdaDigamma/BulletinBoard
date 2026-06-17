@@ -1,8 +1,5 @@
 # BulletinBoard
 
-[![Version](https://img.shields.io/cocoapods/v/BulletinBoard.svg?style=flat)](https://cocoapods.org/pods/BulletinBoard)
-[![License](https://img.shields.io/cocoapods/l/BulletinBoard.svg?style=flat)](https://cocoapods.org/pods/BulletinBoard)
-[![Platform](https://img.shields.io/cocoapods/p/BulletinBoard.svg?style=flat)](https://cocoapods.org/pods/BulletinBoard)
 [![Documentation](https://img.shields.io/badge/Documentation-available-blue.svg)](https://alexisakers.github.io/BulletinBoard)
 [![Contact: @_alexaubry](https://raw.githubusercontent.com/alexaubry/BulletinBoard/main/.assets/twitter_badge.svg?sanitize=true)](https://twitter.com/_alexaubry)
 
@@ -40,28 +37,10 @@ Build and run the scheme for your favorite language to open the demo app.
 
 ## Installation
 
-### Swift Package Manager
-
 To install BulletinBoard using the [Swift Package Manager](https://swift.org/package-manager/), add this dependency to your `Package.swift` file:
 
 ~~~swift
 .package(url: "https://github.com/alexaubry/BulletinBoard.git", from: "5.0.0")
-~~~
-
-### CocoaPods
-
-To install BulletinBoard using [CocoaPods](https://cocoapods.org), add this line to your `Podfile`:
-
-~~~ruby
-pod 'BulletinBoard'
-~~~
-
-### Carthage
-
-To install BulletinBoard using [Carthage](https://github.com/Carthage/Carthage), add this line to your `Cartfile`:
-
-~~~
-github "alexaubry/BulletinBoard"
 ~~~
 
 ## Documentation

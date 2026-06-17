@@ -51,7 +51,6 @@
 		558A122C1F7D73CD005EC97C /* BulletinViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BulletinViewController.swift; sourceTree = "<group>"; };
 		558A122D1F7D73CD005EC97C /* HighlightButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HighlightButton.swift; sourceTree = "<group>"; };
 		558D808A218DC5B6000ADAFD /* BLTNBoardTests.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = BLTNBoardTests.plist; sourceTree = "<group>"; };
-		558D8092218DCA81000ADAFD /* FBSnapshotTestCase.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSnapshotTestCase.framework; path = Carthage/Build/iOS/FBSnapshotTestCase.framework; sourceTree = "<group>"; };
 		5590C04E20B85BCE0045C315 /* BLTNTitleLabelContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLTNTitleLabelContainer.swift; sourceTree = "<group>"; };
 		5590C05220B93B350045C315 /* UIColor+Luminance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+Luminance.swift"; sourceTree = "<group>"; };
 		559F8EA2204DC42D00322949 /* UIView+RoundedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+RoundedView.swift"; sourceTree = "<group>"; };
@@ -69,7 +68,6 @@
 		5E437A3024894748009DBF9A /* BLTNActionItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BLTNActionItem.swift; sourceTree = "<group>"; };
 		5E437A3224894A27009DBF9A /* BLTNPageItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLTNPageItem.swift; sourceTree = "<group>"; };
 		5E437A36248971BC009DBF9A /* BLTNItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BLTNItem.swift; sourceTree = "<group>"; };
-		5E9D32682108FB9A0032FB06 /* BulletinBoard.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = BulletinBoard.podspec; sourceTree = "<group>"; };
 		5E9D326C2108FCED0032FB06 /* BLTNBoardSwiftSupport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLTNBoardSwiftSupport.h; sourceTree = "<group>"; };
 		5EB7CFE4248541EA0052D611 /* BLTNItemManager+Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BLTNItemManager+Helpers.swift"; sourceTree = "<group>"; };
 		AD2FAA261CD0B6D800659CF4 /* BLTNBoard.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = BLTNBoard.plist; sourceTree = "<group>"; };
@@ -89,11 +87,9 @@
 		52D6D9721BEFF229002C0205 = {
 			isa = PBXGroup;
 			children = (
-				5E9D32682108FB9A0032FB06 /* BulletinBoard.podspec */,
 				8933C7811EB5B7E0000D00A4 /* Sources */,
 				52D6D99C1BEFF38C002C0205 /* Configs */,
 				52D6D97D1BEFF229002C0205 /* Products */,
-				558D8091218DCA81000ADAFD /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -112,14 +108,6 @@
 				558D808A218DC5B6000ADAFD /* BLTNBoardTests.plist */,
 			);
 			path = Configs;
-			sourceTree = "<group>";
-		};
-		558D8091218DCA81000ADAFD /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				558D8092218DCA81000ADAFD /* FBSnapshotTestCase.framework */,
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		55B3D1D01FDD643B00737791 /* InterfaceBuilder */ = {
