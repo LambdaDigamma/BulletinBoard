@@ -1,6 +1,14 @@
 # _BulletinBoard_ Changelog
 ## Unreleased
 
+## 🔖 v6.1.0
+### Changes
+- Adopt Swift 6 language mode, SwiftPM tools 6.2, and complete strict concurrency.
+- Add scene-based bulletin presentation with a `UIWindowScene` API.
+- Remove Objective-C API support and the Objective-C compatibility header.
+- Remove the Objective-C demo app target, scheme, and resources.
+- Remove Objective-C-era `NSObject` inheritance from Swift-only manager and configuration types.
+
 ## 🔖 v5.0.0
 ### Changes
 - Require iOS 11.0

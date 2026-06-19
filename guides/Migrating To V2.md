@@ -15,13 +15,6 @@ For compatibility reasons, the module was renamed to `BLTNBoard`. You will need 
 import BLTNBoard
 ~~~
 
-### Objective-C
-
-~~~objc
-// #import <BulletinBoard/BulletinBoard.h>
-#import <BLTNBoard/BLTNBoard.h>
-~~~
-
 ## Renamed classes
 
 Most types have been renamed to adopt the `BLTN` prefix. See the table below for a comparison of old and new names.

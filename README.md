@@ -15,9 +15,9 @@ Here are some screenshots showing what you can build with BulletinBoard:
 
 ## Requirements
 
-- Xcode 11 and later
-- iOS 9 and later
-- Swift 5.1 and later (also works with Objective-C).
+- Xcode 26 and later
+- iOS 15 and later
+- Swift 6 language mode with SwiftPM PackageDescription 6.2 or later.
 
 ## Demo
 
@@ -28,19 +28,14 @@ A demo project is included in the `BulletinBoard` workspace. It demonstrates how
 - create custom page subclasses to add features
 - create custom cards from scratch
 
-Two demo targets are available:
-
-- `BB-Swift` (demo written in Swift)
-- `BB-ObjC` (demo written in Objective-C)
-
-Build and run the scheme for your favorite language to open the demo app.
+Build and run the `BB-Swift` scheme to open the demo app.
 
 ## Installation
 
 To install BulletinBoard using the [Swift Package Manager](https://swift.org/package-manager/), add this dependency to your `Package.swift` file:
 
 ~~~swift
-.package(url: "https://github.com/alexaubry/BulletinBoard.git", from: "5.0.0")
+.package(url: "https://github.com/alexaubry/BulletinBoard.git", from: "6.1.0")
 ~~~
 
 ## Documentation
