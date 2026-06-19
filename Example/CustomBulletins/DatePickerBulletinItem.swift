@@ -10,7 +10,7 @@ import BLTNBoard
  * A bulletin item that demonstrates how to integrate a date picker inside a bulletin item.
  */
 
-@objc public class DatePickerBLTNItem: BLTNPageItem {
+public class DatePickerBLTNItem: BLTNPageItem {
     public lazy var datePicker = UIDatePicker()
 
     /**

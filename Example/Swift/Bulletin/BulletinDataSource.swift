@@ -43,8 +43,14 @@ enum BulletinDataSource {
 
         page.presentationHandler = { item in
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2)) {
-                item.manager?.hideActivityIndicator()
+            Task { @MainActor [weak item] in
+                do {
+                    try await Task.sleep(nanoseconds: 2_000_000_000)
+                } catch {
+                    return
+                }
+
+                item?.manager?.hideActivityIndicator()
             }
 
         }

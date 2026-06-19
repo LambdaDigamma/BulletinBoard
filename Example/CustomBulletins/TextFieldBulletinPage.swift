@@ -13,11 +13,11 @@ import BLTNBoard
  * when the keyboard is visible.
  */
 
-@objc public class TextFieldBulletinPage: FeedbackPageBLTNItem {
+public class TextFieldBulletinPage: FeedbackPageBLTNItem {
 
-    @objc public var textField: UITextField!
+    public var textField: UITextField!
 
-    @objc public var textInputHandler: ((TextFieldBulletinPage, String?) -> Void)? = nil
+    public var textInputHandler: ((TextFieldBulletinPage, String?) -> Void)? = nil
 
     override public func makeViewsUnderDescription(with interfaceBuilder: BLTNInterfaceBuilder) -> [UIView]? {
         textField = interfaceBuilder.makeTextField(placeholder: "First and Last Name", returnKey: .done, delegate: self)
@@ -40,7 +40,7 @@ import BLTNBoard
 
 extension TextFieldBulletinPage: UITextFieldDelegate {
 
-    @objc open func isInputValid(text: String?) -> Bool {
+    public func isInputValid(text: String?) -> Bool {
 
         if text == nil || text!.isEmpty {
             return false

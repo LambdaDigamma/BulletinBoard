@@ -12,7 +12,7 @@ import BLTNBoard
  * This item demonstrates popping to the previous item, and including a collection view inside the page.
  */
 
-@objc public class PetValidationBLTNItem: FeedbackPageBLTNItem {
+public class PetValidationBLTNItem: FeedbackPageBLTNItem {
 
     let dataSource: CollectionDataSource
     let animalType: String
@@ -79,9 +79,17 @@ import BLTNBoard
 
         // > Wait for a "task" to complete before displaying the next item
 
-        let delay = DispatchTime.now() + .seconds(2)
+        Task { @MainActor [weak self] in
+            do {
+                try await Task.sleep(nanoseconds: 2_000_000_000)
+            } catch {
+                return
+            }
 
-        DispatchQueue.main.asyncAfter(deadline: delay) {
+            guard let self else {
+                return
+            }
+
             // Play success haptic feedback
             self.successFeedbackGenerator.prepare()
             self.successFeedbackGenerator.success()

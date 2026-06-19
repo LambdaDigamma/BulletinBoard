@@ -51,9 +51,9 @@ public enum CollectionDataSource: String {
  * A collection view cell that displays an image.
  */
 
-@objc public class ImageCollectionViewCell: UICollectionViewCell {
+public class ImageCollectionViewCell: UICollectionViewCell {
 
-    @objc public let imageView = UIImageView()
+    public let imageView = UIImageView()
 
     override init(frame: CGRect) {
         super.init(frame: frame)

@@ -13,14 +13,14 @@ import BLTNBoard
  * next item based on user interaction.
  */
 
-@objc public class PetSelectorBulletinPage: FeedbackPageBLTNItem {
+public class PetSelectorBulletinPage: FeedbackPageBLTNItem {
     private var catButtonContainer: UIButton!
     private var dogButtonContainer: UIButton!
     private var selectionFeedbackGenerator = SelectionFeedbackGenerator()
     
     let completionHandler: (BLTNItem) -> Void
 
-    @objc public init(completionHandler: @escaping (BLTNItem) -> Void) {
+    public init(completionHandler: @escaping (BLTNItem) -> Void) {
         self.completionHandler = completionHandler
         super.init(title: "Choose your Favorite")
     }

@@ -12,7 +12,7 @@ import BLTNBoard
  * This class demonstrates how to override `PageBLTNItem` to customize button tap handling.
  */
 
-@objc public class FeedbackPageBLTNItem: BLTNPageItem {
+public class FeedbackPageBLTNItem: BLTNPageItem {
 
     private let feedbackGenerator = SelectionFeedbackGenerator()
 
