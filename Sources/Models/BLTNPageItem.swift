@@ -20,12 +20,12 @@ import UIKit
 * builder type, change the `interfaceBuilderType` property.
 */
 
-@objc open class BLTNPageItem: BLTNActionItem {
+open class BLTNPageItem: BLTNActionItem {
     
     // MARK: - Page Contents
 
     /// The title of the page.
-    @objc public let title: String
+    public let title: String
 
     /**
      * An image to display below the title.
@@ -35,14 +35,14 @@ import UIKit
      * The image should have a size of 128x128 pixels (@1x).
      */
 
-    @objc open var image: UIImage? {
+    open var image: UIImage? {
         didSet {
             imageView?.image = image
         }
     }
 
     /// An accessibility label which gets announced to VoiceOver users if the image gets focused.
-    @objc open var imageAccessibilityLabel: String? {
+    open var imageAccessibilityLabel: String? {
         didSet {
             image?.accessibilityLabel = imageAccessibilityLabel
         }
@@ -54,7 +54,7 @@ import UIKit
      * If you set this property to `nil`, no label will be displayed (this is the default).
      */
 
-    @objc open var descriptionText: String? {
+    open var descriptionText: String? {
         didSet {
             descriptionLabel?.text = descriptionText
         }
@@ -68,7 +68,7 @@ import UIKit
      * `attributedDescriptionText` will be used.
      */
 
-    @objc open var attributedDescriptionText: NSAttributedString? {
+    open var attributedDescriptionText: NSAttributedString? {
         didSet {
             descriptionLabel?.attributedText = attributedDescriptionText
         }
@@ -76,9 +76,9 @@ import UIKit
 
     // MARK: - View Management
 
-    @objc private(set) open var titleLabel: BLTNTitleLabelContainer?
-    @objc private(set) open var descriptionLabel: UILabel?
-    @objc private(set) open var imageView: UIImageView?
+    open private(set) var titleLabel: BLTNTitleLabelContainer?
+    open private(set) var descriptionLabel: UILabel?
+    open private(set) var imageView: UIImageView?
 
     // MARK: - Initialization
     
@@ -87,7 +87,7 @@ import UIKit
      * - parameter title: The title of the page.
      */
     
-    @objc public init(title: String) {
+    public init(title: String) {
         self.title = title
         super.init()
     }
@@ -107,7 +107,6 @@ import UIKit
      * - returns: The header views for the item, or `nil` if no header views should be added.
      */
 
-    @objc(makeHeaderViewsWithInterfaceBuilder:)
     open func makeHeaderViews(interfaceBuilder: BLTNInterfaceBuilder) -> [UIView]? {
         return nil
     }
@@ -124,7 +123,6 @@ import UIKit
      * - returns: The views to display after the title, or `nil` if no views should be added.
      */
 
-    @objc(makeViewsUnderTitleWithInterfaceBuilder:)
     open func makeViewsUnderTitle(with interfaceBuilder: BLTNInterfaceBuilder) -> [UIView]? {
         return nil
     }
@@ -141,7 +139,6 @@ import UIKit
      * - returns: The views to display after the image, or `nil` if no views should be added.
      */
 
-    @objc(makeViewsUnderImageWithInterfaceBuilder:)
     open func makeViewsUnderImage(with interfaceBuilder: BLTNInterfaceBuilder) -> [UIView]? {
         return nil
     }
@@ -158,7 +155,6 @@ import UIKit
      * - returns: The views to display after the description, or `nil` if no views should be added.
      */
 
-    @objc(makeViewsUnderDescriptionWithInterfaceBuilder:)
     open func makeViewsUnderDescription(with interfaceBuilder: BLTNInterfaceBuilder) -> [UIView]? {
         return nil
     }

@@ -10,13 +10,13 @@ import UIKit
  * standard components.
  */
 
-@objc open class BLTNInterfaceBuilder: NSObject {
+open class BLTNInterfaceBuilder {
 
     /// The appearance to use to generate the items.
-    @objc public let appearance: BLTNItemAppearance
+    public let appearance: BLTNItemAppearance
 
     /// Creates a new interface builder.
-    @objc public required init(appearance: BLTNItemAppearance) {
+    public required init(appearance: BLTNItemAppearance) {
         self.appearance = appearance
     }
 
@@ -24,7 +24,6 @@ import UIKit
      * Creates a standard title label.
      */
 
-    @objc(makeTitleLabelNextToCloseButton:)
     open func makeTitleLabel(isNextToCloseButton: Bool) -> BLTNTitleLabelContainer {
 
         let titleLabel = UILabel()
@@ -45,7 +44,7 @@ import UIKit
      * Creates a standard description label.
      */
 
-    @objc open func makeDescriptionLabel() -> UILabel {
+    open func makeDescriptionLabel() -> UILabel {
 
         let descriptionLabel = UILabel()
         descriptionLabel.textAlignment = .center
@@ -65,7 +64,7 @@ import UIKit
      * - parameter delegate: The delegate for the text field.
      */
 
-    @objc open func makeTextField(placeholder: String? = nil,
+    open func makeTextField(placeholder: String? = nil,
                                   returnKey: UIReturnKeyType = .default,
                                   delegate: UITextFieldDelegate? = nil) -> UITextField {
 
@@ -89,7 +88,7 @@ import UIKit
      * - parameter title: The title of the button.
      */
 
-    @objc open func makeActionButton(title: String) -> BLTNHighlightButtonWrapper {
+    open func makeActionButton(title: String) -> BLTNHighlightButtonWrapper {
 
         if #available(iOS 26, *), appearance.actionButtonImage == nil {
             return makeGlassActionButton(title: title)
@@ -177,7 +176,7 @@ import UIKit
      * - parameter title: The title of the button.
      */
 
-    @objc open func makeAlternativeButton(title: String) -> UIButton {
+    open func makeAlternativeButton(title: String) -> UIButton {
 
         let alternativeButton = UIButton()
         alternativeButton.layer.cornerRadius = appearance.alternativeButtonCornerRadius
@@ -203,7 +202,7 @@ import UIKit
      * - parameter spacing: The spacing between elements. Defaults to `10`.
      */
 
-    @objc open func makeGroupStack(spacing: CGFloat = 10) -> UIStackView {
+    open func makeGroupStack(spacing: CGFloat = 10) -> UIStackView {
 
         let buttonsStack = UIStackView()
         buttonsStack.axis = .vertical
@@ -230,7 +229,7 @@ import UIKit
      * view to a stack view.
      */
 
-    @objc open func wrapView(_ view: UIView, width: NSNumber?, height: NSNumber?, position: BLTNViewPosition) -> BLTNContainerView {
+    open func wrapView(_ view: UIView, width: NSNumber?, height: NSNumber?, position: BLTNViewPosition) -> BLTNContainerView {
 
         let container = BLTNContainerView()
 

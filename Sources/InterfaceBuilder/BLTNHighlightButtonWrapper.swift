@@ -12,10 +12,10 @@ import UIKit
  * a bulletin transition.
  */
 
-@objc public class BLTNHighlightButtonWrapper: UIView {
+public class BLTNHighlightButtonWrapper: UIView {
 
     /// The underlying button.
-    @objc public let button: UIButton
+    public let button: UIButton
 
     public required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) is unavailable. Use init(button:) instead.")

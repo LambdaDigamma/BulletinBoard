@@ -4,7 +4,7 @@ import UIKit
  * An item that can be displayed inside a bulletin card.
  */
 
-@objc open class BLTNItem: NSObject {
+open class BLTNItem: NSObject {
     
     // MARK: - Configuration
 
@@ -17,7 +17,7 @@ import UIKit
      * When implementing `BLTNItem`, you should mark this property `weak` to avoid retain cycles.
      */
 
-    @objc public internal(set) weak var manager: BLTNItemManager?
+    public internal(set) weak var manager: BLTNItemManager?
 
     /**
      * Whether the page can be dismissed.
@@ -29,7 +29,7 @@ import UIKit
      * (ex: a purchase).
      */
 
-    @objc open var isDismissable: Bool = true
+    open var isDismissable: Bool = true
 
     /**
      * Whether the page can be dismissed with a close button.
@@ -41,7 +41,7 @@ import UIKit
      * such as an action button.
      */
 
-    @objc open var requiresCloseButton: Bool = true
+    open var requiresCloseButton: Bool = true
 
     /**
      * Whether the card should start with an activity indicator.
@@ -50,7 +50,7 @@ import UIKit
      * you'll need to call `manager?.hideActivityIndicator()` to show the UI.
      */
 
-    @objc open var shouldStartWithActivityIndicator: Bool = false
+    open var shouldStartWithActivityIndicator: Bool = false
 
     /**
      * Whether the item should move with the keyboard.
@@ -60,7 +60,7 @@ import UIKit
      * are displayed.
      */
 
-    @objc open var shouldRespondToKeyboardChanges: Bool = true
+    open var shouldRespondToKeyboardChanges: Bool = true
 
     /**
      * The item to display after this one.
@@ -69,7 +69,7 @@ import UIKit
      * the stack.
      */
 
-    @objc(nextItem) open var next: BLTNItem?
+    open var next: BLTNItem?
     
     // MARK: - Event Handlers
     
@@ -77,10 +77,9 @@ import UIKit
      * The block of code to execute when the bulletin item is presented. This is called after the
      * bulletin is moved onto the view.
      *
-     * - parameter item: The item that is being presented.
      */
 
-        @objc open var presentationHandler: ((BLTNItem) -> Void)?
+    open var presentationHandler: ((BLTNItem) -> Void)?
 
     /**
      * The block of code to execute when the bulletin item is dismissed. This is called when the bulletin
@@ -89,7 +88,7 @@ import UIKit
      * You can leave it `nil` if `isDismissable` is set to false.
      */
 
-    @objc open var dismissalHandler: ((BLTNItem) -> Void)?
+    open var dismissalHandler: ((BLTNItem) -> Void)?
 
     // MARK: - Interface
 

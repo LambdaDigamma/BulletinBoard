@@ -9,7 +9,7 @@ import UIKit
  * A shape layer that animates its path inside a block.
  */
 
-private class AnimatingShapeLayer: CAShapeLayer {
+nonisolated private class AnimatingShapeLayer: CAShapeLayer {
 
     override class func defaultAction(forKey event: String) -> CAAction? {
 
@@ -27,7 +27,7 @@ private class AnimatingShapeLayer: CAShapeLayer {
  * A layer whose corners are rounded with a continuous mask (“squircle“).
  */
 
-class ContinuousMaskLayer: CALayer {
+nonisolated class ContinuousMaskLayer: CALayer {
 
     /// The corner radius.
     var continuousCornerRadius: CGFloat = 0 {

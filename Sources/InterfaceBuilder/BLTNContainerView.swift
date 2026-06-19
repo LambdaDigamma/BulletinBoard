@@ -14,10 +14,10 @@ import UIKit
  * to specify the view that should be displayed and position it with Auto Layout.
  */
 
-@objc public class BLTNContainerView: UIView {
+public class BLTNContainerView: UIView {
 
     /// The size of the content displayed in this view.
-    @objc public var contentSize: CGSize = .zero
+    public var contentSize: CGSize = .zero
 
     /**
      * Adds the child view and configures the constraints.
@@ -26,7 +26,7 @@ import UIKit
      * the child view.
      */
 
-    @objc public func setChildView(_ childView: UIView, constraintsBuilder: @escaping (BLTNContainerView, UIView) -> Void) {
+    public func setChildView(_ childView: UIView, constraintsBuilder: @escaping (BLTNContainerView, UIView) -> Void) {
         currentChildView?.removeFromSuperview()
         currentChildView = childView
         addSubview(childView)

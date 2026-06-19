@@ -9,14 +9,14 @@ import UIKit
  * A view that contains a title label.
  */
 
-@objc public class BLTNTitleLabelContainer: UIView {
+public class BLTNTitleLabelContainer: UIView {
 
     /// The label contained in the view.
-    @objc public let label: UILabel
+    public let label: UILabel
 
     // MARK: - Initialization
 
-    @objc init(label: UILabel, horizontalInset: CGFloat) {
+    init(label: UILabel, horizontalInset: CGFloat) {
         self.label = label
         super.init(frame: .zero)
         configureSubviews(horizontalInset: horizontalInset)

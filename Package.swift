@@ -1,4 +1,4 @@
-// swift-tools-version:6.0
+// swift-tools-version:6.2
 import PackageDescription
 
 let package = Package(
@@ -13,7 +13,10 @@ let package = Package(
             name: "BLTNBoard",
             dependencies: [],
             path: "Sources",
-            swiftSettings: [.swiftLanguageMode(.v5)]
+            swiftSettings: [
+                .swiftLanguageMode(.v6),
+                .defaultIsolation(MainActor.self),
+            ]
         ),
     ]
 )

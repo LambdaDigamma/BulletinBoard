@@ -34,7 +34,6 @@
 		5E437A3124894748009DBF9A /* BLTNActionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E437A3024894748009DBF9A /* BLTNActionItem.swift */; };
 		5E437A3324894A27009DBF9A /* BLTNPageItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E437A3224894A27009DBF9A /* BLTNPageItem.swift */; };
 		5E437A37248971BC009DBF9A /* BLTNItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E437A36248971BC009DBF9A /* BLTNItem.swift */; };
-		5E9D326D2108FCED0032FB06 /* BLTNBoardSwiftSupport.h in Headers */ = {isa = PBXBuildFile; fileRef = 5E9D326C2108FCED0032FB06 /* BLTNBoardSwiftSupport.h */; };
 		5EB7CFE5248541EA0052D611 /* BLTNItemManager+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EB7CFE4248541EA0052D611 /* BLTNItemManager+Helpers.swift */; };
 /* End PBXBuildFile section */
 
@@ -68,7 +67,6 @@
 		5E437A3024894748009DBF9A /* BLTNActionItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BLTNActionItem.swift; sourceTree = "<group>"; };
 		5E437A3224894A27009DBF9A /* BLTNPageItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLTNPageItem.swift; sourceTree = "<group>"; };
 		5E437A36248971BC009DBF9A /* BLTNItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BLTNItem.swift; sourceTree = "<group>"; };
-		5E9D326C2108FCED0032FB06 /* BLTNBoardSwiftSupport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLTNBoardSwiftSupport.h; sourceTree = "<group>"; };
 		5EB7CFE4248541EA0052D611 /* BLTNItemManager+Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BLTNItemManager+Helpers.swift"; sourceTree = "<group>"; };
 		AD2FAA261CD0B6D800659CF4 /* BLTNBoard.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = BLTNBoard.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -179,7 +177,6 @@
 		55DADEB81F8153B3001B11A2 /* Support */ = {
 			isa = PBXGroup;
 			children = (
-				5E9D326C2108FCED0032FB06 /* BLTNBoardSwiftSupport.h */,
 				558A122C1F7D73CD005EC97C /* BulletinViewController.swift */,
 				55BDB0D220BAFB9C005A6C2B /* Helpers */,
 				55B3D1D21FDD645900737791 /* Views */,
@@ -217,7 +214,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5E9D326D2108FCED0032FB06 /* BLTNBoardSwiftSupport.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -412,9 +408,12 @@
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_SWIFT3_OBJC_INFERENCE = Off;
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -467,9 +466,12 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_SWIFT3_OBJC_INFERENCE = Off;
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -496,8 +498,11 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.BulletinBoard.BulletinBoard-iOS";
 				PRODUCT_NAME = BLTNBoard;
 				SKIP_INSTALL = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 5.0;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Debug;
 		};
@@ -519,8 +524,11 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.BulletinBoard.BulletinBoard-iOS";
 				PRODUCT_NAME = BLTNBoard;
 				SKIP_INSTALL = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 5.0;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Release;
 		};

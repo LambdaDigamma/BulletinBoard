@@ -3,28 +3,28 @@
  *  Copyright (c) 2017 - present Alexis Aubry. Licensed under the MIT license.
  */
 
-import UIKit
+import Foundation
 
 @available(*, unavailable, renamed: "BLTNItem")
-@objc public protocol BulletinItem {}
+public protocol BulletinItem {}
 
 @available(*, unavailable, renamed: "BLTNItemManager")
-@objc public class BulletinManager: NSObject {}
+public class BulletinManager {}
 
 @available(*, unavailable, renamed: "BLTNActionItem")
-@objc public class ActionBulletinItem: NSObject {}
+public class ActionBulletinItem {}
 
 @available(*, unavailable, renamed: "BLTNPageItem")
-@objc public class PageBulletinItem: NSObject {}
+public class PageBulletinItem {}
 
 @available(*, unavailable, message: "To specify the appearance, use BLTNItemAppearance. To create standard views, use BLTNInterfaceBuilder.")
-@objc public class BulletinInterfaceFactory: NSObject {}
+public class BulletinInterfaceFactory {}
 
 @available(*, unavailable, renamed: "BLTNSpacing")
-@objc public class BulletinPadding: NSObject {}
+public class BulletinPadding {}
 
 @available(*, unavailable, renamed: "BLTNBackgroundViewStyle")
-@objc public class BulletinBackgroundViewStyle: NSObject {}
+public class BulletinBackgroundViewStyle {}
 
 @available(*, unavailable, renamed: "BLTNHighlightButtonWrapper")
-@objc public class HighlightButtonWrapper: UIView {}
+public class HighlightButtonWrapper {}

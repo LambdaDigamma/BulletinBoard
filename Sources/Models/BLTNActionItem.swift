@@ -27,7 +27,7 @@ import UIKit
  * builder type, change the `interfaceBuilderType` property.
  */
 
-@objc open class BLTNActionItem: BLTNItem {
+open class BLTNActionItem: BLTNItem {
     
     // MARK: - Page Contents
     
@@ -37,7 +37,7 @@ import UIKit
      * If you set this property to `nil`, no action button will be added (this is the default).
      */
     
-    @objc open var actionButtonTitle: String? {
+    open var actionButtonTitle: String? {
         didSet {
             actionButton?
                 .setTitle(actionButtonTitle, for: .normal)
@@ -51,7 +51,7 @@ import UIKit
      * If you set this property to `nil`, no alternative button will be added (this is the default).
      */
     
-    @objc open var alternativeButtonTitle: String? {
+    open var alternativeButtonTitle: String? {
         didSet {
             alternativeButton?
                 .setTitle(actionButtonTitle, for: .normal)
@@ -69,7 +69,7 @@ import UIKit
      * after the bulletin page was presented has no effect.
      */
     
-    @objc open var appearance: BLTNItemAppearance = BLTNItemAppearance()
+    open var appearance: BLTNItemAppearance = BLTNItemAppearance()
     
     /**
      * The type of interface builder to use to generate the components.
@@ -78,7 +78,7 @@ import UIKit
      * after the bulletin page was presented has no effect.
      */
     
-    @objc open var interfaceBuilderType: BLTNInterfaceBuilder.Type = BLTNInterfaceBuilder.self
+    open var interfaceBuilderType: BLTNInterfaceBuilder.Type = BLTNInterfaceBuilder.self
     
     // MARK: - Buttons
     
@@ -86,25 +86,28 @@ import UIKit
      * The action button managed by the item.
      */
     
-    @objc open private(set) var actionButton: UIButton?
+    open private(set) var actionButton: UIButton?
     
     /**
      * The alternative button managed by the item.
      */
     
-    @objc open private(set) var alternativeButton: UIButton?
+    open private(set) var alternativeButton: UIButton?
+
+    private var actionButtonAction: UIAction?
+    private var alternativeButtonAction: UIAction?
     
     /**
      * The code to execute when the action button is tapped.
      */
     
-    @objc public var actionHandler: ((BLTNActionItem) -> Void)?
+    public var actionHandler: ((BLTNActionItem) -> Void)?
     
     /**
      * The code to execute when the alternative button is tapped.
      */
     
-    @objc public var alternativeHandler: ((BLTNActionItem) -> Void)?
+    public var alternativeHandler: ((BLTNActionItem) -> Void)?
     
     /**
      * Handles a tap on the action button.
@@ -113,7 +116,6 @@ import UIKit
      * in your implementation.
      */
     
-    @objc(actionButtonTappedWithSender:)
     open func actionButtonTapped(sender: UIButton) {
         actionHandler?(self)
     }
@@ -125,7 +127,6 @@ import UIKit
      * in your implementation.
      */
     
-    @objc(alternativeButtonTappedWithSender:)
     open func alternativeButtonTapped(sender: UIButton) {
         alternativeHandler?(self)
     }
@@ -144,7 +145,6 @@ import UIKit
      * - returns: The footer views for the item, or `nil` if no footer views should be added.
      */
     
-    @objc(makeFooterViewsWithInterfaceBuilder:)
     open func makeFooterViews(with interfaceBuilder: BLTNInterfaceBuilder) -> [UIView]? {
         return nil
     }
@@ -161,7 +161,6 @@ import UIKit
      * - returns: The views to display above the buttons.
      */
     
-    @objc(makeContentViewsWithInterfaceBuilder:)
     open func makeContentViews(with interfaceBuilder: BLTNInterfaceBuilder) -> [UIView] {
         return []
     }
@@ -170,10 +169,10 @@ import UIKit
      * Creates the list of views to display on the bulletin.
      *
      * This is an implementation detail of `BLTNItem` and you should not call it directly. Subclasses should not override this method, and should
-     * implement `makeContentViewsWithInterfaceBuilder:` instead.
+     * implement `makeContentViews(with:)` instead.
      */
     
-    @objc open override func makeArrangedSubviews() -> [UIView] {
+    open override func makeArrangedSubviews() -> [UIView] {
         let interfaceBuilder = interfaceBuilderType.init(appearance: appearance)
         
         var subviews: [UIView] = []
@@ -216,10 +215,28 @@ import UIKit
      * for this item. Make sure to call `super` if you override this method.
      */
     
-    @objc open override func setUp() {
+    open override func setUp() {
         super.setUp()
-        actionButton?.addTarget(self, action: #selector(actionButtonTapped), for: .touchUpInside)
-        alternativeButton?.addTarget(self, action: #selector(alternativeButtonTapped), for: .touchUpInside)
+
+        if let actionButton {
+            let action = UIAction { [weak self, weak actionButton] _ in
+                guard let self, let actionButton else { return }
+                self.actionButtonTapped(sender: actionButton)
+            }
+
+            actionButtonAction = action
+            actionButton.addAction(action, for: .touchUpInside)
+        }
+
+        if let alternativeButton {
+            let action = UIAction { [weak self, weak alternativeButton] _ in
+                guard let self, let alternativeButton else { return }
+                self.alternativeButtonTapped(sender: alternativeButton)
+            }
+
+            alternativeButtonAction = action
+            alternativeButton.addAction(action, for: .touchUpInside)
+        }
         
     }
     
@@ -232,10 +249,19 @@ import UIKit
      * This is an implementation detail of `BLTNItem` and you should not call it directly.
      */
     
-    @objc open override func tearDown() {
+    open override func tearDown() {
         super.tearDown()
-        actionButton?.removeTarget(self, action: nil, for: .touchUpInside)
-        alternativeButton?.removeTarget(self, action: nil, for: .touchUpInside)
+
+        if let actionButtonAction {
+            actionButton?.removeAction(actionButtonAction, for: .touchUpInside)
+        }
+
+        if let alternativeButtonAction {
+            alternativeButton?.removeAction(alternativeButtonAction, for: .touchUpInside)
+        }
+
+        actionButtonAction = nil
+        alternativeButtonAction = nil
         actionButton = nil
         alternativeButton = nil
     }

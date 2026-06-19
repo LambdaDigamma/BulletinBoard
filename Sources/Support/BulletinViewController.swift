@@ -72,7 +72,7 @@ final class BulletinViewController: UIViewController, UIGestureRecognizerDelegat
 
     // MARK: - Deinit
 
-    deinit {
+    isolated deinit {
         cleanUpKeyboardLogic()
     }
 
