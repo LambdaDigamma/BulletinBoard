@@ -1,6 +1,15 @@
 # _BulletinBoard_ Changelog
 ## Unreleased
 
+## 🔖 v6.1.1
+### Fixes
+- Prevent isolated destructor crashes on older iOS when UIKit releases animation objects outside a Swift task.
+- Keep item teardown on MainActor and preserve task-local values after a background owner releases the manager.
+
+### Changes
+- Enable the two extra Swift Approachable Concurrency features in the Swift package.
+- Add six regression tests and an iOS simulator test script. Tests pass on iOS 18.6 and iOS 27.1 with Thread Sanitizer under Xcode 27 RC. Xcode 26.3 validation remains pending.
+
 ## 🔖 v6.1.0
 ### Changes
 - Adopt Swift 6 language mode, SwiftPM tools 6.2, and complete strict concurrency.

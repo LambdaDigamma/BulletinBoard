@@ -35,7 +35,7 @@ Build and run the `BB-Swift` scheme to open the demo app.
 To install BulletinBoard using the [Swift Package Manager](https://swift.org/package-manager/), add this dependency to your `Package.swift` file:
 
 ~~~swift
-.package(url: "https://github.com/alexaubry/BulletinBoard.git", from: "6.1.0")
+.package(url: "https://github.com/LambdaDigamma/BulletinBoard.git", from: "6.1.1")
 ~~~
 
 ## Documentation
