@@ -17,6 +17,9 @@ import UIKit
 
 public class AnimationChain {
 
+    // ARC-only cleanup must bypass isolated-deinit back-deployment on older iOS.
+    nonisolated deinit {}
+
     /// The total duration of the animation chain.
     public let duration: TimeInterval
 
@@ -112,6 +115,9 @@ public class AnimationChain {
  */
 
 public class AnimationPhase {
+
+    // ARC-only cleanup must bypass isolated-deinit back-deployment on older iOS.
+    nonisolated deinit {}
 
     /**
      * The duration of the animation, relative to the total duration of the chain.

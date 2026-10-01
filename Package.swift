@@ -15,7 +15,19 @@ let package = Package(
             path: "Sources",
             swiftSettings: [
                 .swiftLanguageMode(.v6),
+                .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
+                .enableUpcomingFeature("InferIsolatedConformances"),
                 .defaultIsolation(MainActor.self),
+            ]
+        ),
+        .testTarget(
+            name: "BLTNBoardTests",
+            dependencies: ["BLTNBoard"],
+            swiftSettings: [
+                .swiftLanguageMode(.v6),
+                .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
+                .enableUpcomingFeature("InferIsolatedConformances"),
+                .defaultIsolation(nil),
             ]
         ),
     ]

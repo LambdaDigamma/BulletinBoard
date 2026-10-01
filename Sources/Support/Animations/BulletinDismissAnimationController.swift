@@ -9,6 +9,9 @@ import UIKit
 
 class BulletinDismissAnimationController: NSObject, UIViewControllerAnimatedTransitioning {
 
+    // ARC-only cleanup must bypass isolated-deinit back-deployment on older iOS.
+    nonisolated deinit {}
+
     func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
         return 0.3
     }

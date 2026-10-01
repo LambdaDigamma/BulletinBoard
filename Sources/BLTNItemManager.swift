@@ -137,14 +137,21 @@ public final class BLTNItemManager {
 
     }
 
-    isolated deinit {
-
-        tearDownItemsChain(startingAt: self.rootItem)
-
-        for item in itemsStack {
-            tearDownItemsChain(startingAt: item)
+    nonisolated deinit {
+        // Keep items alive until their UI cleanup runs. Do not capture the dying manager.
+        let items = [rootItem] + itemsStack
+        let cleanUp: @MainActor @Sendable () -> Void = {
+            for item in items {
+                Self.tearDownItemsChain(startingAt: item)
+            }
         }
-
+        // UIKit can release us synchronously outside a Swift task. Avoid the broken
+        // isolated-deinit runtime on older iOS, but retain MainActor cleanup.
+        if Thread.isMainThread {
+            MainActor.assumeIsolated { cleanUp() }
+        } else {
+            Task { @MainActor in cleanUp() }
+        }
     }
 
 }
@@ -347,7 +354,7 @@ extension BLTNItemManager {
                 
                 for removeIndex in (index+1..<itemsStack.count).reversed() {
                     let removeItem = itemsStack.remove(at: removeIndex)
-                    tearDownItemsChain (startingAt: removeItem)
+                    Self.tearDownItemsChain(startingAt: removeItem)
                 }
                 return
             }
@@ -695,13 +702,13 @@ extension BLTNItemManager {
     }
 
     /// Tears down every item on the stack starting from the specified item.
-    fileprivate func tearDownItemsChain(startingAt item: BLTNItem) {
+    fileprivate static func tearDownItemsChain(startingAt item: BLTNItem) {
 
         item.tearDown()
         item.manager = nil
 
         if let next = item.next {
-            tearDownItemsChain(startingAt: next)
+            Self.tearDownItemsChain(startingAt: next)
             item.next = nil
         }
 

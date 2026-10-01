@@ -10,6 +10,9 @@ import UIKit
  */
 
 public class BLTNBackgroundViewStyle {
+
+    // ARC-only cleanup must bypass isolated-deinit back-deployment on older iOS.
+    nonisolated deinit {}
     public enum Style {
         case none
         case dimmed

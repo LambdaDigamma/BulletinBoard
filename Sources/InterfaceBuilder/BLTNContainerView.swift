@@ -16,6 +16,9 @@ import UIKit
 
 public class BLTNContainerView: UIView {
 
+    // ARC-only cleanup must bypass isolated-deinit back-deployment on older iOS.
+    nonisolated deinit {}
+
     /// The size of the content displayed in this view.
     public var contentSize: CGSize = .zero
 

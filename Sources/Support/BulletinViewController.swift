@@ -72,8 +72,9 @@ final class BulletinViewController: UIViewController, UIGestureRecognizerDelegat
 
     // MARK: - Deinit
 
-    isolated deinit {
-        cleanUpKeyboardLogic()
+    nonisolated deinit {
+        // Selector observers can be removed on any thread; no UI access is required.
+        NotificationCenter.default.removeObserver(self)
     }
 
 }

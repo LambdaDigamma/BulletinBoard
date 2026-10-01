@@ -11,6 +11,9 @@ import UIKit
 
 class RoundedView: UIView, RoundedViewProtocol {
 
+    // ARC-only cleanup must bypass isolated-deinit back-deployment on older iOS.
+    nonisolated deinit {}
+
     override class var layerClass: AnyClass {
         return ContinuousMaskLayer.self
     }

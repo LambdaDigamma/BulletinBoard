@@ -12,6 +12,9 @@ import UIKit
 
 open class BLTNInterfaceBuilder {
 
+    // ARC-only cleanup must bypass isolated-deinit back-deployment on older iOS.
+    nonisolated deinit {}
+
     /// The appearance to use to generate the items.
     public let appearance: BLTNItemAppearance
 

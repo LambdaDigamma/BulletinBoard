@@ -10,6 +10,9 @@ import UIKit
  */
 
 public class BLTNSpacing {
+
+    // ARC-only cleanup must bypass isolated-deinit back-deployment on older iOS.
+    nonisolated deinit {}
     public let rawValue: CGFloat
 
     init(rawValue: CGFloat) {

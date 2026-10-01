@@ -11,6 +11,9 @@ import UIKit
 
 public class BLTNTitleLabelContainer: UIView {
 
+    // ARC-only cleanup must bypass isolated-deinit back-deployment on older iOS.
+    nonisolated deinit {}
+
     /// The label contained in the view.
     public let label: UILabel
 

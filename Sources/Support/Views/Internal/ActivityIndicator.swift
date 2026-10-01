@@ -11,6 +11,9 @@ import UIKit
 
 class ActivityIndicator: UIView {
 
+    // ARC-only cleanup must bypass isolated-deinit back-deployment on older iOS.
+    nonisolated deinit {}
+
     private let activityIndicatorView = UIActivityIndicatorView()
 
     // MARK: - Lifecycle

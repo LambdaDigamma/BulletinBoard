@@ -14,6 +14,9 @@ import UIKit
 
 class HighlightButton: UIButton {
 
+    // ARC-only cleanup must bypass isolated-deinit back-deployment on older iOS.
+    nonisolated deinit {}
+
     /// When true, disables custom alpha-based highlight animation (used for glass-styled buttons
     /// where the system provides its own visual feedback).
     var usesSystemHighlight: Bool = false

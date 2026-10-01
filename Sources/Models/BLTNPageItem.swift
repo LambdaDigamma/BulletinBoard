@@ -21,6 +21,9 @@ import UIKit
 */
 
 open class BLTNPageItem: BLTNActionItem {
+
+    // ARC-only cleanup must bypass isolated-deinit back-deployment on older iOS.
+    nonisolated deinit {}
     
     // MARK: - Page Contents
 

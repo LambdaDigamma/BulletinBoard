@@ -11,6 +11,9 @@ import UIKit
 
 class BulletinBackgroundView: UIView {
 
+    // ARC-only cleanup must bypass isolated-deinit back-deployment on older iOS.
+    nonisolated deinit {}
+
     let style: BLTNBackgroundViewStyle
 
     // MARK: - Content View

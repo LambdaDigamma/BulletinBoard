@@ -10,6 +10,9 @@ import UIKit
  */
 
 class BulletinCloseButton: UIControl {
+
+    // ARC-only cleanup must bypass isolated-deinit back-deployment on older iOS.
+    nonisolated deinit {}
     private let backgroundContainer = UIView()
     private let closeGlyph = UIImageView()
 

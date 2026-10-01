@@ -11,6 +11,9 @@ import UIKit
 
 class BulletinSwipeInteractionController: UIPercentDrivenInteractiveTransition, UIGestureRecognizerDelegate {
 
+    // ARC-only cleanup must bypass isolated-deinit back-deployment on older iOS.
+    nonisolated deinit {}
+
     /// Whether a panning interaction is in progress.
     var isInteractionInProgress = false
 

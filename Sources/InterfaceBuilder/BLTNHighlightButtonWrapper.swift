@@ -14,6 +14,9 @@ import UIKit
 
 public class BLTNHighlightButtonWrapper: UIView {
 
+    // ARC-only cleanup must bypass isolated-deinit back-deployment on older iOS.
+    nonisolated deinit {}
+
     /// The underlying button.
     public let button: UIButton
 

@@ -5,6 +5,9 @@ import UIKit
  */
 
 open class BLTNItem: NSObject {
+
+    // ARC-only cleanup must bypass isolated-deinit back-deployment on older iOS.
+    nonisolated deinit {}
     
     // MARK: - Configuration
 

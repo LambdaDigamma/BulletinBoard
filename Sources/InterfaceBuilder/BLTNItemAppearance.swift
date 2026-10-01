@@ -11,6 +11,9 @@ import UIKit
 
 public class BLTNItemAppearance {
 
+    // ARC-only cleanup must bypass isolated-deinit back-deployment on older iOS.
+    nonisolated deinit {}
+
     public init() {}
 
     // MARK: - Color Customization
