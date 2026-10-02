@@ -1,6 +1,14 @@
 # _BulletinBoard_ Changelog
 ## Unreleased
 
+### Fixes
+- Keep bulletins clear of an active iPhone Duo fold, fit narrow and short regions, and scroll long content and keyboard forms. Adapt the demo controls and galleries to live width changes.
+[#1](https://github.com/LambdaDigamma/BulletinBoard/pull/1)
+
+### Changed Behavior
+- Require Xcode 27.1 or later to build the Duo APIs. Keep the iOS 15 deployment target. Use a default card corner radius of 12 independently of safe-area insets.
+[#1](https://github.com/LambdaDigamma/BulletinBoard/pull/1)
+
 ## 🔖 v6.1.1
 ### Fixes
 - Prevent isolated destructor crashes on older iOS when UIKit releases animation objects outside a Swift task.
