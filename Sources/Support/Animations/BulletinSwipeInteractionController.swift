@@ -78,7 +78,7 @@ class BulletinSwipeInteractionController: UIPercentDrivenInteractiveTransition, 
 
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         guard let pan = gestureRecognizer as? UIPanGestureRecognizer,
-              viewController.contentScrollView.isScrollEnabled else { return true }
+              viewController.canScrollContent else { return true }
 
         let scrollView = viewController.contentScrollView
         let velocity = pan.velocity(in: contentView)

@@ -31,7 +31,7 @@ Regular-width cards prefer 444 points and shrink when the clear region is narrow
 
 `edgeSpacing` is measured from the usable region. Safe-area changes do not set the spacing to zero. The default `cardCornerRadius` is 12; an explicit value is preserved. `edgeSpacing = .none` gives the card square corners. `hidesHomeIndicator` lets the card surface extend to the bottom edge in compact width while the scroll view keeps content clear of the system inset.
 
-On a compact card, a downward drag at the top of the content can dismiss a dismissable item. Other content drags scroll. Nested galleries keep their own scroll gestures.
+On a compact card, a downward drag at the top of the content can dismiss a dismissable item. Other content drags scroll. The scroll view stays enabled as content changes. The swipe recognizer checks the current content size when a gesture starts. Nested galleries keep their own scroll gestures.
 
 ## Custom items and demo checks
 

@@ -34,7 +34,7 @@ final class BulletinViewControllerLayoutTests: XCTestCase {
         let scrollView = fixture.controller.contentScrollView
 
         assertCardIsWithinSafeArea(fixture.controller)
-        XCTAssertTrue(scrollView.isScrollEnabled)
+        XCTAssertTrue(fixture.controller.canScrollContent)
         XCTAssertGreaterThan(scrollView.contentSize.height, scrollView.bounds.height)
         let bottomOffset = scrollView.contentSize.height - scrollView.bounds.height
             + scrollView.adjustedContentInset.bottom
@@ -44,7 +44,7 @@ final class BulletinViewControllerLayoutTests: XCTestCase {
         layout(fixture, size: CGSize(width: 620, height: 980))
 
         assertCardIsWithinSafeArea(fixture.controller)
-        XCTAssertFalse(scrollView.isScrollEnabled)
+        XCTAssertFalse(fixture.controller.canScrollContent)
         let fullContentHeight = scrollView.contentSize.height
             + scrollView.adjustedContentInset.top + scrollView.adjustedContentInset.bottom
         XCTAssertGreaterThanOrEqual(scrollView.bounds.height + 1, fullContentHeight)
@@ -109,7 +109,7 @@ final class BulletinViewControllerLayoutTests: XCTestCase {
             XCTAssertGreaterThan(cardFrame.maxY, safeFrame.maxY)
             XCTAssertTrue(controller.view.bounds.insetBy(dx: -0.5, dy: -0.5).contains(cardFrame))
             XCTAssertLessThanOrEqual(stackFrame.maxY, safeFrame.maxY + 0.5)
-            XCTAssertFalse(controller.contentScrollView.isScrollEnabled)
+            XCTAssertFalse(controller.canScrollContent)
         }
     }
 

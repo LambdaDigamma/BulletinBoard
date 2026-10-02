@@ -316,8 +316,6 @@ extension BulletinViewController {
         // Keyboard and child safe-area guides have their final geometry after layout.
         updateLayoutRegion()
         let scrollInsets = contentScrollView.adjustedContentInset
-        let naturalHeight = contentScrollView.contentSize.height + scrollInsets.top + scrollInsets.bottom
-        contentScrollView.isScrollEnabled = naturalHeight > contentScrollView.bounds.height + 1
         let insetHeight = scrollInsets.top + scrollInsets.bottom
         if naturalHeightConstraint.constant != insetHeight {
             naturalHeightConstraint.constant = insetHeight
@@ -344,6 +342,13 @@ extension BulletinViewController {
             if let responder = firstResponder(in: child) { return responder }
         }
         return nil
+    }
+
+    /// Read at gesture time, after the scroll view has laid out its content.
+    var canScrollContent: Bool {
+        let insets = contentScrollView.adjustedContentInset
+        return contentScrollView.isScrollEnabled
+            && contentScrollView.contentSize.height + insets.top + insets.bottom > contentScrollView.bounds.height + 1
     }
 
     private func updateLayoutRegion() {

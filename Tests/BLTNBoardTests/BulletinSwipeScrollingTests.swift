@@ -74,7 +74,7 @@ final class BulletinSwipeScrollingTests: XCTestCase {
     func testShortCardRetainsItsDragInteraction() {
         prepare()
         defer { cleanUp() }
-        controller.contentScrollView.isScrollEnabled = false
+        controller.contentScrollView.contentSize.height = 160
         let pan = VelocityPanGestureRecognizer()
         pan.testVelocity = CGPoint(x: 0, y: -300)
         XCTAssertTrue(interaction.gestureRecognizerShouldBegin(pan))
