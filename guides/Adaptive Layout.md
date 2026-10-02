@@ -37,7 +37,7 @@ On a compact card, a downward drag at the top of the content can dismiss a dismi
 
 Give custom content flexible horizontal constraints and a complete vertical layout. A collection view must invalidate width-dependent cell sizes when its bounds change. Avoid a fixed control width that exceeds a narrow card.
 
-The demo includes direct entry points for forms, a date picker, pet choices, and long content. Both galleries recalculate cells after width changes. Isolated UIKit previews show narrow and short layouts.
+The demo includes direct entry points for forms, a date picker, pet choices, and long content. Both galleries recalculate cells after width changes. The nine-photo grid uses a square frame and the card's scroll view, so every row and the actions share one scroll path. Isolated UIKit previews show narrow and short layouts.
 
 Check these paths in the iPhone Duo simulator:
 

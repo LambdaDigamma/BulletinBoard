@@ -43,11 +43,15 @@ public class PetValidationBLTNItem: FeedbackPageBLTNItem {
         let flowLayout = ResizingCollectionViewFlowLayout()
         flowLayout.scrollDirection = .vertical
         flowLayout.minimumInteritemSpacing = 1
+        flowLayout.minimumLineSpacing = 1
 
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
         collectionView.backgroundColor = .white
+        collectionView.isScrollEnabled = false
+        collectionView.contentInsetAdjustmentBehavior = .never
+        collectionView.heightAnchor.constraint(equalTo: collectionView.widthAnchor).isActive = true
 
-        let collectionWrapper = interfaceBuilder.wrapView(collectionView, width: nil, height: 256, position: .pinnedToEdges)
+        let collectionWrapper = interfaceBuilder.wrapView(collectionView, width: nil, height: nil, position: .pinnedToEdges)
 
         self.collectionView = collectionView
         collectionView.register(ImageCollectionViewCell.self, forCellWithReuseIdentifier: "cell")
