@@ -45,7 +45,7 @@ Check these paths in the iPhone Duo simulator:
 2. Rotate to a horizontal division. Check that the whole card stays clear of the fold.
 3. Open **Enter Name**, show the keyboard, and fold or unfold without losing the field.
 4. Open **Pet Care Guide** and scroll to the final action.
-5. Open **Favorite Pets**, continue to the gallery, and change the window width.
+5. Open **Favorite Pets**, continue to the gallery, scroll to **Validate** and **Change**, and change the window width.
 6. Dismiss and reopen. Repeat with a compact iPhone and an older supported iOS runtime.
 
 Focused regression tests are described in [Testing](../Tests/TESTING.md).

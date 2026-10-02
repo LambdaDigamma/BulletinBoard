@@ -51,6 +51,52 @@ final class BulletinViewControllerLayoutTests: XCTestCase {
         XCTAssertLessThanOrEqual(scrollView.contentOffset.y, -scrollView.adjustedContentInset.top + 1)
     }
 
+    func testSquareGalleryKeepsBothActionsVisibleAndHittableAfterScrolling() {
+        let fixture = makeFixture(size: CGSize(width: 669, height: 448),
+                                  horizontalSizeClass: .regular, contentHeight: 0)
+        defer { removeFixture(fixture) }
+        let controller = fixture.controller
+        let stack = controller.contentStackView
+        for view in stack.arrangedSubviews {
+            stack.removeArrangedSubview(view)
+            view.removeFromSuperview()
+        }
+
+        let builder = BLTNInterfaceBuilder(appearance: BLTNItemAppearance())
+        let title = builder.makeTitleLabel(isNextToCloseButton: false)
+        title.label.text = "Choose your Favorite"
+        let description = builder.makeDescriptionLabel()
+        description.text = "You chose cats as your favorite animal type. Here are a few examples of posts in this category."
+        let gallery = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+        gallery.isScrollEnabled = false
+        gallery.contentInsetAdjustmentBehavior = .never
+        gallery.heightAnchor.constraint(equalTo: gallery.widthAnchor).isActive = true
+        let galleryWrapper = builder.wrapView(gallery, width: nil, height: nil, position: .pinnedToEdges)
+        let validate = builder.makeActionButton(title: "Validate")
+        let change = builder.makeAlternativeButton(title: "Change")
+        for view in [title, description, galleryWrapper, validate, change] {
+            stack.addArrangedSubview(view)
+        }
+        layout(fixture)
+
+        XCTAssertTrue(controller.canScrollContent)
+        let initialChangeFrame = change.convert(change.bounds, to: controller.view)
+        XCTAssertGreaterThan(initialChangeFrame.maxY, controller.contentView.frame.maxY)
+
+        let scrollView = controller.contentScrollView
+        scrollView.scrollRectToVisible(change.convert(change.bounds, to: scrollView), animated: false)
+        layout(fixture)
+
+        for action in [validate.button, change] {
+            let frame = action.convert(action.bounds, to: controller.view)
+            XCTAssertGreaterThanOrEqual(frame.minY, controller.contentView.frame.minY)
+            XCTAssertLessThanOrEqual(frame.maxY, controller.contentView.frame.maxY)
+            let point = CGPoint(x: frame.midX, y: frame.midY)
+            let hitView = controller.view.hitTest(point, with: nil)
+            XCTAssertTrue(hitView?.isDescendant(of: action) == true)
+        }
+    }
+
     func testCompactCardKeepsDesignSpacingWhenSafeAreaChanges() {
         let fixture = makeFixture(size: CGSize(width: 390, height: 700),
                                   horizontalSizeClass: .compact, contentHeight: 160)
