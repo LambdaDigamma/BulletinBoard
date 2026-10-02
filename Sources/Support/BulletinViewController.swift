@@ -31,6 +31,9 @@ final class BulletinViewController: UIViewController, UIGestureRecognizerDelegat
 
     let contentStackView = UIStackView()
 
+    /// Keeps every item reachable when the available region is shorter than the content.
+    let contentScrollView = UIScrollView()
+
     /// The view covering the content. Generated in `loadBackgroundView`.
     var backgroundView: BulletinBackgroundView!
 
@@ -70,12 +73,26 @@ final class BulletinViewController: UIViewController, UIGestureRecognizerDelegat
     fileprivate var contentTopConstraint: NSLayoutConstraint!
     fileprivate var contentBottomConstraint: NSLayoutConstraint!
 
+    private let availableRegionGuide = UILayoutGuide()
+    private var regionLeftConstraint: NSLayoutConstraint!
+    private var regionTopConstraint: NSLayoutConstraint!
+    private var regionWidthConstraint: NSLayoutConstraint!
+    private var regionHeightConstraint: NSLayoutConstraint!
+    private var maxHeightConstraint: NSLayoutConstraint!
+    private var keyboardLimitConstraint: NSLayoutConstraint!
+    private var naturalHeightConstraint: NSLayoutConstraint!
+    private var preferredRegionPoint: CGPoint?
+    private var lastLayoutRegion: CGRect?
+    private var isInPlace = false
+    private var needsResponderVisibility = true
+    private var lastScrollSize = CGSize.zero
+    private var lastContentSize = CGSize.zero
+    private weak var lastVisibleResponder: UIView?
+
     // MARK: - Deinit
 
-    nonisolated deinit {
-        // Selector observers can be removed on any thread; no UI access is required.
-        NotificationCenter.default.removeObserver(self)
-    }
+    // ARC-only cleanup must bypass isolated-deinit back-deployment on older iOS.
+    nonisolated deinit {}
 
 }
 
@@ -111,20 +128,29 @@ extension BulletinViewController {
         view.addGestureRecognizer(recognizer)
 
         contentView.accessibilityViewIsModal = true
+        contentView.clipsToBounds = true
         contentView.translatesAutoresizingMaskIntoConstraints = false
         contentStackView.translatesAutoresizingMaskIntoConstraints = false
 
         view.addSubview(contentView)
 
+        view.addLayoutGuide(availableRegionGuide)
+        regionLeftConstraint = availableRegionGuide.leftAnchor.constraint(equalTo: view.leftAnchor)
+        regionTopConstraint = availableRegionGuide.topAnchor.constraint(equalTo: view.topAnchor)
+        regionWidthConstraint = availableRegionGuide.widthAnchor.constraint(equalToConstant: view.bounds.width)
+        regionHeightConstraint = availableRegionGuide.heightAnchor.constraint(equalToConstant: view.bounds.height)
+        NSLayoutConstraint.activate([regionLeftConstraint, regionTopConstraint, regionWidthConstraint, regionHeightConstraint])
+
         // Content View
 
-        centerXConstraint = contentView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor)
+        centerXConstraint = contentView.centerXAnchor.constraint(equalTo: availableRegionGuide.centerXAnchor)
 
-        centerYConstraint = contentView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor)
+        centerYConstraint = contentView.centerYAnchor.constraint(equalTo: availableRegionGuide.centerYAnchor)
+        centerYConstraint.priority = .defaultHigh
         centerYConstraint.constant = 2500
 
         widthConstraint = contentView.widthAnchor.constraint(equalToConstant: 444)
-        widthConstraint.priority = .required
+        widthConstraint.priority = UILayoutPriority(999)
 
         // Close button
 
@@ -140,15 +166,31 @@ extension BulletinViewController {
 
         // Content Stack View
 
-        contentView.addSubview(contentStackView)
+        contentScrollView.translatesAutoresizingMaskIntoConstraints = false
+        contentScrollView.alwaysBounceVertical = false
+        contentScrollView.contentInsetAdjustmentBehavior = .always
+        contentScrollView.keyboardDismissMode = .interactive
+        contentView.addSubview(contentScrollView)
+        NSLayoutConstraint.activate([
+            contentScrollView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            contentScrollView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            contentScrollView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            contentScrollView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            contentScrollView.contentLayoutGuide.widthAnchor.constraint(equalTo: contentScrollView.frameLayoutGuide.widthAnchor),
+        ])
+        contentScrollView.addSubview(contentStackView)
 
-        stackLeadingConstraint = contentStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor)
+        naturalHeightConstraint = contentScrollView.frameLayoutGuide.heightAnchor.constraint(equalTo: contentScrollView.contentLayoutGuide.heightAnchor)
+        naturalHeightConstraint.priority = .fittingSizeLevel
+        naturalHeightConstraint.isActive = true
+
+        stackLeadingConstraint = contentStackView.leadingAnchor.constraint(equalTo: contentScrollView.contentLayoutGuide.leadingAnchor)
         stackLeadingConstraint.isActive = true
 
-        stackTrailingConstraint = contentStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor)
+        stackTrailingConstraint = contentStackView.trailingAnchor.constraint(equalTo: contentScrollView.contentLayoutGuide.trailingAnchor)
         stackTrailingConstraint.isActive = true
 
-        minYConstraint = contentView.topAnchor.constraint(greaterThanOrEqualTo: view.safeAreaLayoutGuide.topAnchor)
+        minYConstraint = contentView.topAnchor.constraint(greaterThanOrEqualTo: availableRegionGuide.topAnchor)
         minYConstraint.isActive = true
         minYConstraint.priority = UILayoutPriority.required
 
@@ -174,8 +216,8 @@ extension BulletinViewController {
 
         // Vertical Position
 
-        stackBottomConstraint = contentStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
-        contentTopConstraint = contentView.topAnchor.constraint(equalTo: contentStackView.topAnchor)
+        stackBottomConstraint = contentStackView.bottomAnchor.constraint(equalTo: contentScrollView.contentLayoutGuide.bottomAnchor)
+        contentTopConstraint = contentScrollView.contentLayoutGuide.topAnchor.constraint(equalTo: contentStackView.topAnchor)
 
         stackBottomConstraint.isActive = true
         contentTopConstraint.isActive = true
@@ -185,6 +227,18 @@ extension BulletinViewController {
         configureContentView()
         setUpKeyboardLogic()
 
+        if #available(iOS 17.0, *) {
+            registerForTraitChanges([UITraitHorizontalSizeClass.self, UITraitVerticalSizeClass.self, UITraitLayoutDirection.self]) { (self: BulletinViewController, _) in
+                self.view.setNeedsLayout()
+            }
+        }
+
+        if #available(iOS 27.1, *) {
+            view.addInteraction(UIHingeInteraction { [weak self] _, _ in
+                self?.view.setNeedsLayout()
+            })
+        }
+
         contentView.bringSubviewToFront(closeButton)
 
     }
@@ -192,8 +246,7 @@ extension BulletinViewController {
     @available(iOS 11.0, *)
     override func viewSafeAreaInsetsDidChange() {
         super.viewSafeAreaInsetsDidChange()
-        updateCornerRadius()
-        setUpLayout(with: traitCollection)
+        view.setNeedsLayout()
     }
 
     /// Configure content view with customizations.
@@ -211,25 +264,24 @@ extension BulletinViewController {
         let cardPadding = manager.edgeSpacing.rawValue
 
         // Set left and right padding
-        leadingConstraint = contentView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor,
+        leadingConstraint = contentView.leadingAnchor.constraint(equalTo: availableRegionGuide.leadingAnchor,
                                                                  constant: cardPadding)
 
-        trailingConstraint = contentView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor,
+        trailingConstraint = contentView.trailingAnchor.constraint(equalTo: availableRegionGuide.trailingAnchor,
                                                                    constant: -cardPadding)
 
         // Set maximum width with padding
 
-        maxWidthConstraint = contentView.widthAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.widthAnchor,
+        maxWidthConstraint = contentView.widthAnchor.constraint(lessThanOrEqualTo: availableRegionGuide.widthAnchor,
                                                                 constant: -(cardPadding * 2))
 
         maxWidthConstraint.priority = .required
         maxWidthConstraint.isActive = true
 
-        if manager.hidesHomeIndicator {
-            contentBottomConstraint = contentView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        } else {
-            contentBottomConstraint = contentView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
-        }
+        maxHeightConstraint = contentView.heightAnchor.constraint(lessThanOrEqualTo: availableRegionGuide.heightAnchor)
+        maxHeightConstraint.isActive = true
+
+        contentBottomConstraint = contentView.bottomAnchor.constraint(equalTo: availableRegionGuide.bottomAnchor)
 
         contentBottomConstraint.constant = 1000
         contentBottomConstraint.isActive = true
@@ -252,10 +304,126 @@ extension BulletinViewController {
 
 extension BulletinViewController {
 
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        updateLayoutRegion()
+        setUpLayout(with: traitCollection)
+        updateCornerRadius()
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Keyboard and child safe-area guides have their final geometry after layout.
+        updateLayoutRegion()
+        let scrollInsets = contentScrollView.adjustedContentInset
+        let naturalHeight = contentScrollView.contentSize.height + scrollInsets.top + scrollInsets.bottom
+        contentScrollView.isScrollEnabled = naturalHeight > contentScrollView.bounds.height + 1
+        let insetHeight = scrollInsets.top + scrollInsets.bottom
+        if naturalHeightConstraint.constant != insetHeight {
+            naturalHeightConstraint.constant = insetHeight
+            view.setNeedsLayout()
+        }
+        let responder = firstResponder(in: contentStackView)
+        let scrollGeometryChanged = lastScrollSize != contentScrollView.bounds.size
+            || lastContentSize != contentScrollView.contentSize
+        if needsResponderVisibility || scrollGeometryChanged || responder !== lastVisibleResponder,
+           manager?.currentItem.shouldRespondToKeyboardChanges == true,
+           let responder {
+            let rect = responder.convert(responder.bounds, to: contentScrollView).insetBy(dx: -8, dy: -8)
+            contentScrollView.scrollRectToVisible(rect, animated: false)
+        }
+        needsResponderVisibility = false
+        lastScrollSize = contentScrollView.bounds.size
+        lastContentSize = contentScrollView.contentSize
+        lastVisibleResponder = responder
+    }
+
+    private func firstResponder(in view: UIView) -> UIView? {
+        if view.isFirstResponder { return view }
+        for child in view.subviews {
+            if let responder = firstResponder(in: child) { return responder }
+        }
+        return nil
+    }
+
+    private func updateLayoutRegion() {
+        let safeFrame = view.bounds.inset(by: view.safeAreaInsets)
+        var usableFrame = safeFrame
+        let respondsToKeyboard = manager?.currentItem.shouldRespondToKeyboardChanges == true
+        let keyboardFrame = view.keyboardLayoutGuide.layoutFrame
+        let keyboardOverlap = safeFrame.intersection(keyboardFrame)
+        let keyboardIsVisible = !keyboardOverlap.isNull && !keyboardOverlap.isEmpty
+
+        if respondsToKeyboard && keyboardIsVisible {
+            usableFrame.size.height = max(0, keyboardFrame.minY - usableFrame.minY)
+        }
+
+        var divisions: [CGRect] = []
+        if #available(iOS 27.1, *) {
+            divisions = view.reservedRegions(kind: .division).filter(\.isActive).map(\.frame)
+        }
+
+        var region = BulletinLayoutRegion.select(in: usableFrame, excluding: divisions,
+                                                layoutDirection: view.effectiveUserInterfaceLayoutDirection,
+                                                preferredPoint: preferredRegionPoint)
+        preferredRegionPoint = divisions.isEmpty ? nil : CGPoint(x: region.midX, y: region.midY)
+
+        // Only the card surface can extend under the home indicator. Its content keeps its own safe inset.
+        if manager?.hidesHomeIndicator == true,
+           traitCollection.horizontalSizeClass == .compact,
+           !(respondsToKeyboard && keyboardIsVisible),
+           abs(region.maxY - safeFrame.maxY) < 1 {
+            region.size.height = max(0, view.bounds.maxY - region.minY)
+        }
+
+        if let previousRegion = lastLayoutRegion, previousRegion != region, isInPlace {
+            swipeInteractionController?.cancelIfNeeded()
+        }
+
+        let padding = min(defaultBottomMargin, max(0, (region.width - 1) / 2))
+        let verticalPadding = min(defaultBottomMargin, max(0, (region.height - 1) / 2))
+        leadingConstraint.constant = padding
+        trailingConstraint.constant = -padding
+        maxWidthConstraint.constant = -(padding * 2)
+        minYConstraint.constant = verticalPadding
+        maxHeightConstraint.constant = -(verticalPadding * 2)
+        keyboardLimitConstraint.constant = -verticalPadding
+        // Keep the guide connected while hidden so its first keyboard update triggers layout.
+        keyboardLimitConstraint.isActive = isInPlace && respondsToKeyboard
+        if isInPlace { contentBottomConstraint.constant = -min(bottomMargin(), verticalPadding) }
+
+        let preferredStackPadding: CGFloat = traitCollection.horizontalSizeClass == .regular && traitCollection.verticalSizeClass == .regular ? 32 : 24
+        let stackPadding = min(preferredStackPadding, max(0, (region.width - padding * 2) / 2))
+        stackLeadingConstraint.constant = stackPadding
+        stackTrailingConstraint.constant = -stackPadding
+        stackBottomConstraint.constant = -stackPadding
+
+        if lastLayoutRegion != region {
+            lastLayoutRegion = region
+            regionLeftConstraint.constant = region.minX - view.bounds.minX
+            regionTopConstraint.constant = region.minY - view.bounds.minY
+            regionWidthConstraint.constant = max(0, region.width)
+            regionHeightConstraint.constant = max(0, region.height)
+            needsResponderVisibility = true
+            view.setNeedsLayout()
+        }
+    }
+
+    /// Refreshes per-item keyboard policy and content sizing without storing scene geometry.
+    func refreshLayout(resetScrollPosition: Bool = false) {
+        guard isViewLoaded else { return }
+        if resetScrollPosition { contentScrollView.setContentOffset(.zero, animated: false) }
+        needsResponderVisibility = true
+        view.setNeedsLayout()
+    }
+
     override func willTransition(to newCollection: UITraitCollection, with coordinator: UIViewControllerTransitionCoordinator) {
+
+        super.willTransition(to: newCollection, with: coordinator)
 
         coordinator.animate(alongsideTransition: { _ in
             self.setUpLayout(with: newCollection)
+            self.view.setNeedsLayout()
         })
 
     }
@@ -285,16 +453,10 @@ extension BulletinViewController {
 
         switch (traitCollection.verticalSizeClass, traitCollection.horizontalSizeClass) {
         case (.regular, .regular):
-            stackLeadingConstraint.constant = 32
-            stackTrailingConstraint.constant = -32
-            stackBottomConstraint.constant = -32
             contentTopConstraint.constant = -32
             contentStackView.spacing = 32
 
         default:
-            stackLeadingConstraint.constant = 24
-            stackTrailingConstraint.constant = -24
-            stackBottomConstraint.constant = -24
             contentTopConstraint.constant = -24
             contentStackView.spacing = 24
 
@@ -309,10 +471,6 @@ extension BulletinViewController {
     }
 
     func bottomMargin() -> CGFloat {
-        if view.safeAreaInsets.bottom > 0 {
-            return 0
-        }
-
         var bottomMargin: CGFloat = manager?.edgeSpacing.rawValue ?? 12
 
         if manager?.hidesHomeIndicator == true {
@@ -326,8 +484,10 @@ extension BulletinViewController {
     /// Moves the content view to its final location on the screen. Use during presentation.
     func moveIntoPlace() {
 
+        isInPlace = true
         contentBottomConstraint.constant = -bottomMargin()
         centerYConstraint.constant = 0
+        view.setNeedsLayout()
 
         view.layoutIfNeeded()
         contentView.layoutIfNeeded()
@@ -402,11 +562,6 @@ extension BulletinViewController {
 
 extension BulletinViewController {
 
-    @available(iOS 11.0, *)
-    fileprivate var screenHasRoundedCorners: Bool {
-        return view.safeAreaInsets.bottom > 0
-    }
-
     fileprivate func updateCornerRadius() {
 
         if manager?.edgeSpacing.rawValue == 0 {
@@ -414,8 +569,7 @@ extension BulletinViewController {
             return
         }
 
-        let defaultRadius: NSNumber = screenHasRoundedCorners ? 36 : 12
-        contentView.cornerRadius = CGFloat((manager?.cardCornerRadius ?? defaultRadius).doubleValue)
+        contentView.cornerRadius = CGFloat((manager?.cardCornerRadius ?? 12).doubleValue)
 
     }
 
@@ -522,6 +676,11 @@ extension BulletinViewController: UIViewControllerTransitioningDelegate {
     /// Creates a new view swipe interaction controller and wires it to the content view.
     func refreshSwipeInteractionController() {
 
+        if let recognizer = swipeInteractionController?.panGestureRecognizer {
+            contentView.removeGestureRecognizer(recognizer)
+        }
+        swipeInteractionController = nil
+
         guard manager?.allowsSwipeInteraction == true else {
             return
         }
@@ -542,75 +701,12 @@ extension BulletinViewController: UIViewControllerTransitioningDelegate {
 
 extension BulletinViewController {
     func setUpKeyboardLogic() {
-        NotificationCenter.default.addObserver(self, selector: #selector(onKeyboardShow), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(onKeyboardHide), name: UIResponder.keyboardWillHideNotification, object: nil)
-    }
-
-    func cleanUpKeyboardLogic() {
-        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
-    }
-
-    @objc func onKeyboardShow(_ notification: Notification) {
-
-        guard manager?.currentItem.shouldRespondToKeyboardChanges == true else {
-            return
+        view.keyboardLayoutGuide.followsUndockedKeyboard = true
+        if #available(iOS 17.0, *) {
+            view.keyboardLayoutGuide.usesBottomSafeArea = manager?.hidesHomeIndicator != true
         }
-
-        guard let userInfo = notification.userInfo,
-            let keyboardFrameFinal = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
-            let duration = userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double,
-            let curveInt = userInfo[UIResponder.keyboardAnimationCurveUserInfoKey] as? Int
-        else {
-            return
-        }
-
-        let animationCurve = UIView.AnimationCurve(rawValue: curveInt) ?? .linear
-        let animationOptions = UIView.AnimationOptions(curve: animationCurve)
-
-        UIView.animate(withDuration: duration, delay: 0, options: animationOptions, animations: {
-            var bottomSpacing = -(keyboardFrameFinal.size.height + self.defaultBottomMargin)
-            if self.manager?.hidesHomeIndicator == false {
-                bottomSpacing += self.view.safeAreaInsets.bottom
-            }
-
-            self.minYConstraint.isActive = false
-            self.contentBottomConstraint.constant = bottomSpacing
-            self.centerYConstraint.constant = -(keyboardFrameFinal.size.height + 12) / 2
-            self.contentView.superview?.layoutIfNeeded()
-        
-        }, completion: nil)
-
-    }
-
-    @objc func onKeyboardHide(_ notification: Notification) {
-
-        guard manager?.currentItem.shouldRespondToKeyboardChanges == true else {
-            return
-        }
-
-        guard let userInfo = notification.userInfo,
-            let duration = userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double,
-            let curveInt = userInfo[UIResponder.keyboardAnimationCurveUserInfoKey] as? Int
-        else {
-            return
-        }
-
-        let animationCurve = UIView.AnimationCurve(rawValue: curveInt) ?? .linear
-        let animationOptions = UIView.AnimationOptions(curve: animationCurve)
-
-        UIView.animate(withDuration: duration, delay: 0, options: animationOptions, animations: {
-            self.minYConstraint.isActive = true
-            self.contentBottomConstraint.constant = -self.bottomMargin()
-            self.centerYConstraint.constant = 0
-            self.contentView.superview?.layoutIfNeeded()
-        }, completion: nil)
-
-    }
-}
-
-extension UIView.AnimationOptions {
-    init(curve: UIView.AnimationCurve) {
-        self = UIView.AnimationOptions(rawValue: UInt(curve.rawValue << 16))
+        keyboardLimitConstraint = contentView.bottomAnchor.constraint(lessThanOrEqualTo: view.keyboardLayoutGuide.topAnchor)
+        // The region updates in the same layout cycle. A transient keyboard update must not break required constraints.
+        keyboardLimitConstraint.priority = UILayoutPriority(999)
     }
 }

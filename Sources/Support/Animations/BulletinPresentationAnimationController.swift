@@ -31,17 +31,14 @@ class BulletinPresentationAnimationController: NSObject, UIViewControllerAnimate
     func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
 
         guard let toVC = transitionContext.viewController(forKey: .to) as? BulletinViewController else {
+            transitionContext.completeTransition(false)
             return
         }
 
         let containerView = transitionContext.containerView
 
-        // Fix the frame (Needed for iPad app running in split view)
-        // (Convert the "from" view's frame coordinates to the container view's coordinate system)
-        if let fromView = transitionContext.viewController(forKey: .from)?.view {
-            let fromFrame = containerView.convert(fromView.frame, from: fromView)
-            toVC.view.frame = fromFrame
-        }
+        toVC.view.frame = transitionContext.finalFrame(for: toVC)
+        toVC.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 
         let rootView = toVC.view!
         let contentView = toVC.contentView

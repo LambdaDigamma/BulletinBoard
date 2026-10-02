@@ -26,6 +26,8 @@ class ViewController: UIViewController {
     /// Whether the status bar should be hidden.
     private var shouldHideStatusBar: Bool = false
 
+    private var didCheckInitialBulletin = false
+
     // MARK: - Customization
 
     /// The available background styles.
@@ -62,6 +64,7 @@ class ViewController: UIViewController {
         dataSource = favoriteTab == 0 ? .cat : .dog
 
         styleButtonItem.title = currentBackground.name
+        configureBulletinMenu()
 
         // Set up the collection view
 
@@ -79,6 +82,17 @@ class ViewController: UIViewController {
         collectionView.contentInset.top = 8
         collectionView.contentInset.bottom = 8
 
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        guard !didCheckInitialBulletin else { return }
+        didCheckInitialBulletin = true
+
+        if !BulletinDataSource.userDidCompleteSetup {
+            showBulletin()
+        }
     }
 
     deinit {
@@ -120,12 +134,6 @@ class ViewController: UIViewController {
         navigationController?.isToolbarHidden = false
         toolbarItems = [fontItem, statusBarItem]
 
-        // If the user did not complete the setup, present the bulletin automatically
-
-        if !BulletinDataSource.userDidCompleteSetup {
-            showBulletin()
-        }
-
     }
 
     /**
@@ -133,8 +141,12 @@ class ViewController: UIViewController {
      */
 
     func showBulletin() {
+        showBulletin(item: BulletinDataSource.makeIntroPage())
+    }
 
-        reloadManager()
+    private func showBulletin(item: BLTNItem) {
+
+        bulletinManager = BLTNItemManager(rootItem: item)
 
 //        Uncomment to customize interface
 //        bulletinManager.cardCornerRadius = 22
@@ -147,6 +159,29 @@ class ViewController: UIViewController {
         bulletinManager.statusBarAppearance = shouldHideStatusBar ? .hidden : .automatic
         bulletinManager.showBulletin(above: self)
 
+    }
+
+    private func configureBulletinMenu() {
+        showIntoButtonItem.title = "Bulletins"
+        showIntoButtonItem.target = nil
+        showIntoButtonItem.action = nil
+        showIntoButtonItem.menu = UIMenu(children: [
+            UIAction(title: "Introduction") { [weak self] _ in
+                self?.showBulletin()
+            },
+            UIAction(title: "Enter Name") { [weak self] _ in
+                self?.showBulletin(item: BulletinDataSource.makeTextFieldPage())
+            },
+            UIAction(title: "Birth Date") { [weak self] _ in
+                self?.showBulletin(item: BulletinDataSource.makeDatePage(userName: nil))
+            },
+            UIAction(title: "Favorite Pets") { [weak self] _ in
+                self?.showBulletin(item: BulletinDataSource.makeChoicePage())
+            },
+            UIAction(title: "Pet Care Guide") { [weak self] _ in
+                self?.showBulletin(item: BulletinDataSource.makePetCarePage())
+            }
+        ])
     }
 
     func reloadManager() {
@@ -262,7 +297,7 @@ extension ViewController: UICollectionViewDataSource, UICollectionViewDelegate, 
         let image = dataSource.image(at: indexPath.row)
         let aspectRatio = image.size.height / image.size.width
 
-        let width = collectionView.frame.width
+        let width = max(0, collectionView.bounds.width - collectionView.adjustedContentInset.left - collectionView.adjustedContentInset.right)
         let height = width * aspectRatio
 
         return CGSize(width: width, height: height)

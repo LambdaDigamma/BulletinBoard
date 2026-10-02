@@ -22,6 +22,7 @@ class BulletinSwipeInteractionController: UIPercentDrivenInteractiveTransition, 
     // MARK: - State
 
     private var isFinished = false
+    private var isCancellingForLayoutChange = false
     private var currentPercentage: CGFloat = -1
     private weak var viewController: BulletinViewController!
 
@@ -64,7 +65,33 @@ class BulletinSwipeInteractionController: UIPercentDrivenInteractiveTransition, 
     // MARK: - Gesture Recognizer
 
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
-        return !(touch.view is UIControl)
+        var touchedView = touch.view
+        while let view = touchedView, view !== contentView {
+            if view is UIControl { return false }
+            if let scrollView = view as? UIScrollView, scrollView !== viewController.contentScrollView {
+                return false
+            }
+            touchedView = view.superview
+        }
+        return true
+    }
+
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        guard let pan = gestureRecognizer as? UIPanGestureRecognizer,
+              viewController.contentScrollView.isScrollEnabled else { return true }
+
+        let scrollView = viewController.contentScrollView
+        let velocity = pan.velocity(in: contentView)
+        // A downward drag at the top can dismiss. Other drags belong to the content scroll view.
+        return viewController.isDismissable
+            && viewController.traitCollection.horizontalSizeClass == .compact
+            && velocity.y > abs(velocity.x)
+            && scrollView.contentOffset.y <= -scrollView.adjustedContentInset.top + 1
+    }
+
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+                           shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return otherGestureRecognizer === viewController.contentScrollView.panGestureRecognizer
     }
 
     @objc func handlePanGesture(gestureRecognizer: UIPanGestureRecognizer) {
@@ -137,7 +164,7 @@ class BulletinSwipeInteractionController: UIPercentDrivenInteractiveTransition, 
             isInteractionInProgress = false
 
             if !isFinished {
-                resetCardViews()
+                resetCardViews(animated: !isCancellingForLayoutChange)
             }
 
             panGestureRecognizer?.isEnabled = true
@@ -159,7 +186,6 @@ class BulletinSwipeInteractionController: UIPercentDrivenInteractiveTransition, 
                 finish()
             } else {
                 resetCardViews()
-                cancel()
                 isFinished = false
             }
 
@@ -228,7 +254,7 @@ class BulletinSwipeInteractionController: UIPercentDrivenInteractiveTransition, 
 
     }
 
-    private func resetCardViews() {
+    private func resetCardViews(animated: Bool = true) {
 
         let options = UIView.AnimationOptions(rawValue: 6 << 7)
 
@@ -240,9 +266,20 @@ class BulletinSwipeInteractionController: UIPercentDrivenInteractiveTransition, 
 
         viewController.backgroundView.show()
 
-        UIView.animate(withDuration: 0.15, delay: 0, options: options, animations: animations) { _ in
+        let completion: (Bool) -> Void = { _ in
             self.update(0)
             self.cancel()
+        }
+
+        if animated {
+            UIView.animate(withDuration: 0.15, delay: 0, options: options, animations: animations, completion: completion)
+        } else {
+            animations()
+            // The old snapshot has the old region size. Show the live card while cancellation completes.
+            snapshotView?.isHidden = true
+            contentView.isHidden = false
+            activityIndicatorView.isHidden = false
+            completion(true)
         }
 
     }
@@ -255,9 +292,12 @@ class BulletinSwipeInteractionController: UIPercentDrivenInteractiveTransition, 
 
     func cancelIfNeeded() {
 
-        if panGestureRecognizer?.state == .changed {
-            panGestureRecognizer?.isEnabled = false
-        }
+        guard let recognizer = panGestureRecognizer,
+              recognizer.state == .began || recognizer.state == .changed else { return }
+        isCancellingForLayoutChange = true
+        recognizer.isEnabled = false
+        recognizer.isEnabled = true
+        isCancellingForLayoutChange = false
 
     }
 

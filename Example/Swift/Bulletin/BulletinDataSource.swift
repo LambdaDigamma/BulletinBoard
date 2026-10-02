@@ -222,6 +222,30 @@ enum BulletinDataSource {
 
     }
 
+    /// A longer reading page that also demonstrates scrolling in a short card.
+    static func makePetCarePage() -> BLTNPageItem {
+        let page = BLTNPageItem(title: "Pet Care Guide")
+        page.descriptionText = """
+        A happy pet needs more than a good photo. Build a daily routine that leaves time for food, play, rest, and care.
+
+        Keep fresh water available. Choose food that suits your pet's age and needs, and ask your vet about portion sizes.
+
+        Give your pet a quiet place to rest. Let cats choose when to explore, and give dogs regular walks and chances to sniff.
+
+        Make play part of each day. Rotate toys, check them for damage, and put small pieces away when play ends.
+
+        Brush your pet and check paws, ears, and teeth. Small changes in appetite, energy, or behavior can be a reason to contact your vet.
+
+        When you share a photo, keep your pet comfortable. Use natural light, allow breaks, and never force a pose.
+        """
+        page.actionButtonTitle = "Done"
+        page.isDismissable = true
+        page.actionHandler = { item in
+            item.manager?.dismissBulletin(animated: true)
+        }
+        return page
+    }
+
     /**
      * Create the location page.
      *

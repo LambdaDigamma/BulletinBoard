@@ -29,7 +29,9 @@ To present your bulletin, call this method:
 bulletinManager.showBulletin(above: self)
 ~~~
 
-For the case of onboarding, you can call it in `viewWillAppear(animated:)` after checking if the user has already completed onboarding.
+For onboarding, call it in `viewDidAppear(_:)` after checking if the user has already completed onboarding. Present it once, after the presenting controller is in its window.
+
+Cards adapt to window size changes, the keyboard, and partial folding on iPhone Duo. Content that exceeds the clear region scrolls inside the card. Custom views must allow their width to shrink and must provide a complete vertical layout. See [Adaptive layout](Adaptive%20Layout.md).
 
 ## Creating Page Items
 

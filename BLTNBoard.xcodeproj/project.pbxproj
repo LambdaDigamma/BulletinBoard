@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CF71A738AC7823940A1F9121 /* BulletinLayoutRegion.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF71A738AC7823940A1F9120 /* BulletinLayoutRegion.swift */; };
 		550675691F90A0A500874D8B /* BLTNBackgroundViewStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 550675681F90A0A500874D8B /* BLTNBackgroundViewStyle.swift */; };
 		551D2D9C1FC060EA0078DB21 /* BLTNItemAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 551D2D9B1FC060E90078DB21 /* BLTNItemAppearance.swift */; };
 		5543848B1F91FAC500AFFBCD /* BulletinPresentationAnimationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5543848A1F91FAC500AFFBCD /* BulletinPresentationAnimationController.swift */; };
@@ -38,6 +39,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		CF71A738AC7823940A1F9120 /* BulletinLayoutRegion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BulletinLayoutRegion.swift; sourceTree = "<group>"; };
 		52D6D97C1BEFF229002C0205 /* BLTNBoard.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BLTNBoard.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		550675681F90A0A500874D8B /* BLTNBackgroundViewStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLTNBackgroundViewStyle.swift; sourceTree = "<group>"; };
 		551D2D9B1FC060E90078DB21 /* BLTNItemAppearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLTNItemAppearance.swift; sourceTree = "<group>"; };
@@ -178,6 +180,7 @@
 			isa = PBXGroup;
 			children = (
 				558A122C1F7D73CD005EC97C /* BulletinViewController.swift */,
+				CF71A738AC7823940A1F9120 /* BulletinLayoutRegion.swift */,
 				55BDB0D220BAFB9C005A6C2B /* Helpers */,
 				55B3D1D21FDD645900737791 /* Views */,
 				55B3D1D31FDD646400737791 /* Animations */,
@@ -349,6 +352,7 @@
 				55BDB0CE20BAF845005A6C2B /* BLTNHighlightButtonWrapper.swift in Sources */,
 				5E437A37248971BC009DBF9A /* BLTNItem.swift in Sources */,
 				558A12321F7D73CD005EC97C /* BulletinViewController.swift in Sources */,
+				CF71A738AC7823940A1F9121 /* BulletinLayoutRegion.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

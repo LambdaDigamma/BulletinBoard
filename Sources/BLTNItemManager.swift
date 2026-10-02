@@ -62,7 +62,8 @@ public final class BLTNItemManager {
     public var statusBarAnimation: UIStatusBarAnimation = .fade
 
     /**
-     * The home indicator for iPhone X should be hidden or not. Defaults to false.
+     * Whether the home indicator should be hidden. Defaults to false.
+     * The card surface can extend to the bottom edge. Content keeps its safe-area inset.
      *
      * Set this value before presenting the bulletin. Changing it after will have no effect.
      */
@@ -72,7 +73,7 @@ public final class BLTNItemManager {
     // MARK: - Card Presentation
 
     /**
-     * The spacing between the edge of the screen and the edge of the card. Defaults to regular.
+     * The spacing between the usable region and the edge of the card. Defaults to regular.
      *
      * Set this value before presenting the bulletin. Changing it after will have no effect.
      */
@@ -80,7 +81,7 @@ public final class BLTNItemManager {
     public var edgeSpacing: BLTNSpacing = .regular
 
     /**
-     * The rounded corner radius of the bulletin card. Defaults to 12, and 36 on iPhone X.
+     * The rounded corner radius of the bulletin card. Defaults to 12, independently of system safe areas.
      *
      * Set this value before calling `prepare`. Changing it after will have no effect.
      */
@@ -681,6 +682,8 @@ extension BLTNItemManager {
                     arrangedSubview.removeFromSuperview()
                 }
 
+                self.bulletinController.refreshLayout(resetScrollPosition: true)
+
             }
 
             UIAccessibility.post(notification: .screenChanged, argument: newArrangedSubviews.first)
@@ -697,6 +700,7 @@ extension BLTNItemManager {
         }
 
         transitionAnimationChain.add(finalAnimationPhase)
+        bulletinController.refreshLayout()
         transitionAnimationChain.start()
 
     }

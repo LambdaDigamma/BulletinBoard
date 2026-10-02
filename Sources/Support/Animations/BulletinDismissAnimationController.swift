@@ -64,7 +64,7 @@ class BulletinDismissAnimationController: NSObject, UIViewControllerAnimatedTran
         let options = UIView.AnimationOptions(rawValue: 6 << 16)
 
         let animations = {
-            snapshot.frame.origin.y = rootView.frame.maxY + 12
+            snapshot.frame.origin.y = rootView.bounds.maxY + 12
             backgroundView.hide()
         }
 
@@ -77,8 +77,10 @@ class BulletinDismissAnimationController: NSObject, UIViewControllerAnimatedTran
             } else {
                 contentView.isHidden = false
                 activityIndicatorView.isHidden = false
-                snapshot.removeFromSuperview()
             }
+
+            snapshot.removeFromSuperview()
+            fromVC.activeSnapshotView = nil
 
             transitionContext.completeTransition(!isCancelled)
 
