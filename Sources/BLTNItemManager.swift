@@ -22,7 +22,10 @@ import UIKit
 public final class BLTNItemManager {
 
     /// Bulletin view controller.
-    fileprivate var bulletinController: BulletinViewController!
+    fileprivate var bulletinController: (UIViewController & BulletinPresentationHost)!
+
+    /// The active presenter. Internal access also permits focused presentation tests.
+    var presentationController: UIViewController? { bulletinController }
 
     // MARK: - Background
 
@@ -73,6 +76,16 @@ public final class BLTNItemManager {
     // MARK: - Card Presentation
 
     /**
+     * The presenter to use. Defaults to the custom BulletinBoard card.
+     *
+     * Set this value before showing the bulletin. The native sheet is available on iOS 26
+     * and later; earlier releases use the custom card. UIKit controls native sheet styling
+     * and keyboard behavior. See `BLTNPresentationStyle.nativeSheet` for the differences.
+     */
+
+    public var presentationStyle: BLTNPresentationStyle = .custom
+
+    /**
      * The spacing between the usable region and the edge of the card. Defaults to regular.
      *
      * Set this value before presenting the bulletin. Changing it after will have no effect.
@@ -98,7 +111,12 @@ public final class BLTNItemManager {
      * won't be available.
      */
 
-    public var allowsSwipeInteraction: Bool = true
+    public var allowsSwipeInteraction: Bool = true {
+        didSet {
+            bulletinController?.cancelInteractionIfNeeded()
+            bulletinController?.refreshInteraction()
+        }
+    }
     
     /**
      * Tells us if a bulletin is currently being shown. Defaults to false
@@ -121,6 +139,17 @@ public final class BLTNItemManager {
     fileprivate var isPreparing: Bool = false
     fileprivate var shouldDisplayActivityIndicator: Bool = false
     fileprivate var lastActivityIndicatorColor: UIColor = .black
+    private var interfaceGeneration = 0
+    private var isDismissingBulletin = false
+    private var hasPreparedPresentation = false
+    private var activeItem: BLTNItem?
+
+    private var shouldUseNativeSheet: Bool {
+        if #available(iOS 26.0, *) {
+            return presentationStyle == .nativeSheet
+        }
+        return false
+    }
 
     // MARK: - Initialization
 
@@ -141,9 +170,16 @@ public final class BLTNItemManager {
     nonisolated deinit {
         // Keep items alive until their UI cleanup runs. Do not capture the dying manager.
         let items = [rootItem] + itemsStack
+        let preparedItem = activeItem
+        let wasPrepared = hasPreparedPresentation
         let cleanUp: @MainActor @Sendable () -> Void = {
-            for item in items {
-                Self.tearDownItemsChain(startingAt: item)
+            if wasPrepared {
+                preparedItem?.tearDown()
+                preparedItem?.manager = nil
+            } else {
+                for item in items {
+                    Self.tearDownItemsChain(startingAt: item)
+                }
             }
         }
         // UIKit can release us synchronously outside a Swift task. Avoid the broken
@@ -171,16 +207,22 @@ extension BLTNItemManager {
 
         assertIsMainThread()
 
-        bulletinController = BulletinViewController()
+        if #available(iOS 26.0, *), shouldUseNativeSheet {
+            bulletinController = NativeBulletinViewController()
+        } else {
+            let customController = BulletinViewController()
+            bulletinController = customController
+            customController.modalPresentationStyle = .overFullScreen
+            customController.transitioningDelegate = customController
+            customController.manager = self
+            customController.loadBackgroundView()
+        }
         bulletinController.manager = self
-
-        bulletinController.modalPresentationStyle = .overFullScreen
-        bulletinController.transitioningDelegate = bulletinController
-        bulletinController.loadBackgroundView()
         bulletinController.setNeedsStatusBarAppearanceUpdate()
         bulletinController.setNeedsUpdateOfHomeIndicatorAutoHidden()
         
         isPrepared = true
+        hasPreparedPresentation = true
         isPreparing = true
         shouldDisplayActivityIndicator = rootItem.shouldStartWithActivityIndicator
 
@@ -226,10 +268,10 @@ extension BLTNItemManager {
         assertIsPrepared()
         assertIsMainThread()
 
-        let contentView = bulletinController.contentView
+        let contentView = bulletinController.contentContainer
         let initialRetainCount = CFGetRetainCount(contentView)
 
-        let result = try transform(bulletinController.contentView)
+        let result = try transform(contentView)
         let finalRetainCount = CFGetRetainCount(contentView)
 
         precondition(initialRetainCount == finalRetainCount,
@@ -281,7 +323,7 @@ extension BLTNItemManager {
         assertIsMainThread()
 
         shouldDisplayActivityIndicator = false
-        bulletinController.swipeInteractionController?.cancelIfNeeded()
+        bulletinController.cancelInteractionIfNeeded()
         refreshCurrentItemInterface(elementsChanged: false)
 
     }
@@ -355,7 +397,10 @@ extension BLTNItemManager {
                 
                 for removeIndex in (index+1..<itemsStack.count).reversed() {
                     let removeItem = itemsStack.remove(at: removeIndex)
-                    Self.tearDownItemsChain(startingAt: removeItem)
+                    // Items below the displayed page were torn down when that page changed.
+                    if removeItem.manager === self {
+                        Self.tearDownItemsChain(startingAt: removeItem)
+                    }
                 }
                 return
             }
@@ -425,6 +470,9 @@ extension BLTNItemManager {
                                        animated: Bool = true,
                                      completion: (() -> Void)? = nil) {
 
+        assertIsMainThread()
+        precondition(!isDismissingBulletin && bulletinController?.presentingViewController == nil,
+                     "Attempt to present a Bulletin that is already presented or being dismissed.")
         self.prepare()
 
         let isDetached = bulletinController.presentingViewController == nil
@@ -432,7 +480,7 @@ extension BLTNItemManager {
 
         assertIsPrepared()
         assertIsMainThread()
-        bulletinController.loadView()
+        bulletinController.loadViewIfNeeded()
 
         let refreshActivityIndicator = shouldDisplayActivityIndicator && isDetached
 
@@ -441,7 +489,23 @@ extension BLTNItemManager {
         }
 
         bulletinController.modalPresentationCapturesStatusBarAppearance = true
-        presentingVC.present(bulletinController, animated: animated, completion: completion)
+        let controller = bulletinController!
+        let item = currentItem
+        let generation = interfaceGeneration
+        if #available(iOS 26.0, *), let nativeController = controller as? NativeBulletinViewController {
+            nativeController.prepareForPresentation(in: presentingVC.view)
+            presentingVC.present(controller, animated: animated) {
+                if self.isCurrentInterface(controller: controller, item: item, generation: generation) {
+                    item.willDisplay()
+                    if self.isCurrentInterface(controller: controller, item: item, generation: generation) {
+                        item.onDisplay()
+                    }
+                }
+                completion?()
+            }
+        } else {
+            presentingVC.present(controller, animated: animated, completion: completion)
+        }
 
     }
     
@@ -465,6 +529,19 @@ extension BLTNItemManager {
                              animated: Bool = true,
                              completion: (() -> Void)? = nil) {
         assertIsMainThread()
+        if shouldUseNativeSheet {
+            let visibleWindows = windowScene.windows.filter { !$0.isHidden && $0.rootViewController != nil }
+            let window = visibleWindows.first(where: \.isKeyWindow) ?? visibleWindows.last
+            guard var presenter = window?.rootViewController else {
+                assertionFailure("Unable to find a view controller in the supplied window scene.")
+                return
+            }
+            while let presented = presenter.presentedViewController, !presented.isBeingDismissed {
+                presenter = presented
+            }
+            showBulletin(above: presenter, animated: animated, completion: completion)
+            return
+        }
         let topWindow = windowScene.windows.last
         showBulletin(in: windowScene, above: topWindow, animated: animated, completion: completion)
     }
@@ -522,17 +599,20 @@ extension BLTNItemManager {
 
     public func dismissBulletin(animated: Bool = true) {
 
+        guard !isDismissingBulletin else { return }
         assertIsPrepared()
         assertIsMainThread()
 
-        currentItem.tearDown()
-        currentItem.manager = nil
+        isDismissingBulletin = true
+        interfaceGeneration += 1
+        tearDownCurrentItem()
 
-        bulletinController.dismiss(animated: animated) {
+        let controller = bulletinController!
+        isPrepared = false
+        controller.dismiss(animated: animated) {
+            guard self.bulletinController === controller else { return }
             self.completeDismissal()
         }
-
-        isPrepared = false
 
     }
 
@@ -541,26 +621,38 @@ extension BLTNItemManager {
      */
 
     func completeDismissal() {
+        guard let controller = bulletinController else { return }
+        let dismissedItem = currentItem
+        interfaceGeneration += 1
+        isPrepared = false
+        tearDownCurrentItem()
 
-        currentItem.onDismiss()
-
-        for arrangedSubview in bulletinController.contentStackView.arrangedSubviews {
-            bulletinController.contentStackView.removeArrangedSubview(arrangedSubview)
+        for arrangedSubview in controller.contentStackView.arrangedSubviews {
+            controller.contentStackView.removeArrangedSubview(arrangedSubview)
             arrangedSubview.removeFromSuperview()
         }
         
         presentingWindow?.isHidden = true
         presentingWindow = nil
 
-        bulletinController.backgroundView = nil
-        bulletinController.manager = nil
-        bulletinController.transitioningDelegate = nil
-
+        controller.cleanUpPresentation()
         bulletinController = nil
 
         currentItem = self.rootItem
         itemsStack.removeAll()
+        previousItem = nil
+        isDismissingBulletin = false
+        dismissedItem.onDismiss()
 
+    }
+
+    private func tearDownCurrentItem() {
+        let item = activeItem
+        activeItem = nil
+        if item?.manager === self {
+            item?.tearDown()
+            item?.manager = nil
+        }
     }
 
 }
@@ -576,9 +668,20 @@ extension BLTNItemManager {
     /// Refreshes the interface for the current item.
     fileprivate func refreshCurrentItemInterface(elementsChanged: Bool = true) {
 
+        interfaceGeneration += 1
+        let generation = interfaceGeneration
+        let controller = bulletinController!
+        let item = currentItem
+
+        if #available(iOS 26.0, *), controller is NativeBulletinViewController {
+            refreshNativeItemInterface(elementsChanged: elementsChanged, controller: controller,
+                                       item: item, generation: generation)
+            return
+        }
+
         bulletinController.isDismissable = false
-        bulletinController.swipeInteractionController?.cancelIfNeeded()
-        bulletinController.refreshSwipeInteractionController()
+        bulletinController.cancelInteractionIfNeeded()
+        bulletinController.refreshInteraction()
 
         let showActivityIndicator = self.shouldDisplayActivityIndicator
         let contentAlpha: CGFloat =  showActivityIndicator ? 0 : 1
@@ -589,20 +692,22 @@ extension BLTNItemManager {
         let oldHideableArrangedSubviews = recursiveArrangedSubviews(in: oldArrangedSubviews)
 
         if elementsChanged {
-            previousItem?.tearDown()
-            previousItem?.manager = nil
+            activeItem?.tearDown()
+            activeItem?.manager = nil
+            activeItem = nil
             previousItem = nil
         }
 
         // Create new views
 
-        let newArrangedSubviews = currentItem.makeArrangedSubviews()
+        let newArrangedSubviews = elementsChanged ? currentItem.makeArrangedSubviews() : oldArrangedSubviews
         let newHideableArrangedSubviews = recursiveArrangedSubviews(in: newArrangedSubviews)
 
         if elementsChanged {
 
             currentItem.setUp()
             currentItem.manager = self
+            activeItem = currentItem
 
             for arrangedSubview in newHideableArrangedSubviews {
                 arrangedSubview.isHidden = isPreparing ? false : true
@@ -622,6 +727,7 @@ extension BLTNItemManager {
         let hideSubviewsAnimationPhase = AnimationPhase(relativeDuration: 1/3, curve: .linear)
 
         hideSubviewsAnimationPhase.block = {
+            guard self.isCurrentInterface(controller: controller, item: item, generation: generation) else { return }
 
             if !showActivityIndicator {
                 self.bulletinController.hideActivityIndicator()
@@ -640,6 +746,7 @@ extension BLTNItemManager {
         let displayNewItemsAnimationPhase = AnimationPhase(relativeDuration: 1/3, curve: .linear)
 
         displayNewItemsAnimationPhase.block = {
+            guard self.isCurrentInterface(controller: controller, item: item, generation: generation) else { return }
 
             for arrangedSubview in oldHideableArrangedSubviews {
                 arrangedSubview.isHidden = true
@@ -652,12 +759,14 @@ extension BLTNItemManager {
         }
         
         displayNewItemsAnimationPhase.completionHandler = {
-            self.currentItem.willDisplay()
+            guard self.isCurrentInterface(controller: controller, item: item, generation: generation) else { return }
+            item.willDisplay()
         }
 
         let finalAnimationPhase = AnimationPhase(relativeDuration: 1/3, curve: .linear)
 
         finalAnimationPhase.block = {
+            guard self.isCurrentInterface(controller: controller, item: item, generation: generation) else { return }
 
             let currentElements = elementsChanged ? newArrangedSubviews : oldArrangedSubviews
             self.bulletinController.contentStackView.alpha = contentAlpha
@@ -670,12 +779,15 @@ extension BLTNItemManager {
         }
 
         finalAnimationPhase.completionHandler = {
+            guard self.isCurrentInterface(controller: controller, item: item, generation: generation) else { return }
 
             self.bulletinController.isDismissable = self.currentItem.isDismissable && (showActivityIndicator == false)
 
             if elementsChanged {
 
                 self.currentItem.onDisplay()
+
+                guard self.isCurrentInterface(controller: controller, item: item, generation: generation) else { return }
 
                 for arrangedSubview in oldArrangedSubviews {
                     self.bulletinController.contentStackView.removeArrangedSubview(arrangedSubview)
@@ -703,6 +815,61 @@ extension BLTNItemManager {
         bulletinController.refreshLayout()
         transitionAnimationChain.start()
 
+    }
+
+    /// Reuses item construction and callbacks while UIKit owns the sheet transition.
+    private func refreshNativeItemInterface(elementsChanged: Bool,
+                                            controller: UIViewController & BulletinPresentationHost,
+                                            item: BLTNItem,
+                                            generation: Int) {
+        controller.isDismissable = false
+        controller.loadViewIfNeeded()
+
+        if elementsChanged {
+            if let oldItem = activeItem {
+                oldItem.tearDown()
+                oldItem.manager = nil
+            }
+            activeItem = nil
+            previousItem = nil
+
+            for subview in controller.contentStackView.arrangedSubviews {
+                controller.contentStackView.removeArrangedSubview(subview)
+                subview.removeFromSuperview()
+            }
+            for subview in item.makeArrangedSubviews() {
+                controller.contentStackView.addArrangedSubview(subview)
+            }
+            item.setUp()
+            item.manager = self
+            activeItem = item
+        }
+
+        if shouldDisplayActivityIndicator {
+            controller.updateCloseButton(isRequired: needsCloseButton)
+            controller.displayActivityIndicator(color: lastActivityIndicatorColor)
+        } else {
+            controller.hideActivityIndicator()
+            controller.updateCloseButton(isRequired: needsCloseButton)
+        }
+        controller.refreshLayout(resetScrollPosition: elementsChanged)
+
+        if elementsChanged && !isPreparing {
+            item.willDisplay()
+            guard isCurrentInterface(controller: controller, item: item, generation: generation) else { return }
+        }
+        controller.isDismissable = item.isDismissable && !shouldDisplayActivityIndicator
+        if elementsChanged && !isPreparing {
+            item.onDisplay()
+            guard isCurrentInterface(controller: controller, item: item, generation: generation) else { return }
+        }
+        UIAccessibility.post(notification: .screenChanged,
+                             argument: controller.contentStackView.arrangedSubviews.first)
+    }
+
+    private func isCurrentInterface(controller: UIViewController & BulletinPresentationHost,
+                                    item: BLTNItem, generation: Int) -> Bool {
+        isPrepared && bulletinController === controller && currentItem === item && interfaceGeneration == generation
     }
 
     /// Tears down every item on the stack starting from the specified item.

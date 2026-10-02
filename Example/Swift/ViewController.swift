@@ -27,6 +27,7 @@ class ViewController: UIViewController {
     private var shouldHideStatusBar: Bool = false
 
     private var didCheckInitialBulletin = false
+    private var presentationStyle: BLTNPresentationStyle = .custom
 
     // MARK: - Customization
 
@@ -45,10 +46,7 @@ class ViewController: UIViewController {
      * the bulletin manager.
      */
 
-    lazy var bulletinManager: BLTNItemManager = {
-        let introPage = BulletinDataSource.makeIntroPage()
-        return BLTNItemManager(rootItem: introPage)
-    }()
+    lazy var bulletinManager = makeBulletinManager(rootItem: BulletinDataSource.makeIntroPage())
 
     // MARK: - View
 
@@ -63,7 +61,7 @@ class ViewController: UIViewController {
         segmentedControl.selectedSegmentIndex = favoriteTab
         dataSource = favoriteTab == 0 ? .cat : .dog
 
-        styleButtonItem.title = currentBackground.name
+        updateBackgroundControl()
         configureBulletinMenu()
 
         // Set up the collection view
@@ -146,7 +144,7 @@ class ViewController: UIViewController {
 
     private func showBulletin(item: BLTNItem) {
 
-        bulletinManager = BLTNItemManager(rootItem: item)
+        bulletinManager = makeBulletinManager(rootItem: item)
 
 //        Uncomment to customize interface
 //        bulletinManager.cardCornerRadius = 22
@@ -161,37 +159,76 @@ class ViewController: UIViewController {
 
     }
 
+    private func makeBulletinManager(rootItem: BLTNItem) -> BLTNItemManager {
+        let manager = BLTNItemManager(rootItem: rootItem)
+        manager.presentationStyle = presentationStyle
+        return manager
+    }
+
+    private func selectPresentationStyle(_ style: BLTNPresentationStyle) {
+        presentationStyle = style
+        updateBackgroundControl()
+        configureBulletinMenu()
+        reloadManager()
+    }
+
+    private func updateBackgroundControl() {
+        let usesCustomCard = presentationStyle == .custom
+        styleButtonItem.title = usesCustomCard ? currentBackground.name : "System"
+        styleButtonItem.isEnabled = usesCustomCard
+        styleButtonItem.accessibilityLabel = usesCustomCard ? "Custom Card Background" : "System Sheet Appearance"
+    }
+
     private func configureBulletinMenu() {
+        let customAction = UIAction(title: "Custom Card", state: presentationStyle == .custom ? .on : .off) { [weak self] _ in
+            self?.selectPresentationStyle(.custom)
+        }
+        let nativeAction: UIAction
+        if #available(iOS 26, *) {
+            nativeAction = UIAction(title: "Native Sheet", state: presentationStyle == .nativeSheet ? .on : .off) { [weak self] _ in
+                self?.selectPresentationStyle(.nativeSheet)
+            }
+        } else {
+            nativeAction = UIAction(title: "Native Sheet (iOS 26+)", attributes: .disabled) { _ in }
+        }
+
         showIntoButtonItem.title = "Bulletins"
         showIntoButtonItem.target = nil
         showIntoButtonItem.action = nil
         showIntoButtonItem.menu = UIMenu(children: [
-            UIAction(title: "Introduction") { [weak self] _ in
-                self?.showBulletin()
-            },
-            UIAction(title: "Enter Name") { [weak self] _ in
-                self?.showBulletin(item: BulletinDataSource.makeTextFieldPage())
-            },
-            UIAction(title: "Birth Date") { [weak self] _ in
-                self?.showBulletin(item: BulletinDataSource.makeDatePage(userName: nil))
-            },
-            UIAction(title: "Favorite Pets") { [weak self] _ in
-                self?.showBulletin(item: BulletinDataSource.makeChoicePage())
-            },
-            UIAction(title: "Pet Care Guide") { [weak self] _ in
-                self?.showBulletin(item: BulletinDataSource.makePetCarePage())
-            }
+            UIMenu(title: "Presentation", options: .displayInline, children: [customAction, nativeAction]),
+            UIMenu(title: "Examples", options: .displayInline, children: [
+                UIAction(title: "Introduction") { [weak self] _ in
+                    self?.showBulletin()
+                },
+                UIAction(title: "Enter Name") { [weak self] _ in
+                    self?.showBulletin(item: BulletinDataSource.makeTextFieldPage())
+                },
+                UIAction(title: "Birth Date") { [weak self] _ in
+                    self?.showBulletin(item: BulletinDataSource.makeDatePage(userName: nil))
+                },
+                UIAction(title: "Favorite Pets") { [weak self] _ in
+                    self?.showBulletin(item: BulletinDataSource.makeChoicePage())
+                },
+                UIAction(title: "Pet Photos") { [weak self] _ in
+                    self?.showBulletin(item: BulletinDataSource.makePetPhotosPage())
+                },
+                UIAction(title: "Pet Care Guide") { [weak self] _ in
+                    self?.showBulletin(item: BulletinDataSource.makePetCarePage())
+                }
+            ])
         ])
     }
 
     func reloadManager() {
         let introPage = BulletinDataSource.makeIntroPage()
-        bulletinManager = BLTNItemManager(rootItem: introPage)
+        bulletinManager = makeBulletinManager(rootItem: introPage)
     }
 
     // MARK: - Actions
 
     @IBAction func styleButtonTapped(_ sender: Any) {
+        guard presentationStyle == .custom else { return }
 
         let styleSelectorSheet = UIAlertController(title: "Bulletin Background Style",
                                                    message: nil,
@@ -200,8 +237,8 @@ class ViewController: UIViewController {
         for backgroundStyle in backgroundStyles {
 
             let action = UIAlertAction(title: backgroundStyle.name, style: .default) { _ in
-                self.styleButtonItem.title = backgroundStyle.name
                 self.currentBackground = backgroundStyle
+                self.updateBackgroundControl()
             }
 
             let isSelected = backgroundStyle.name == currentBackground.name

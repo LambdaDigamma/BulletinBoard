@@ -30,11 +30,21 @@ A demo project is included in the `BulletinBoard` workspace. It demonstrates how
 
 Build and run the `BB-Swift` scheme to open the demo app.
 
-Use the **Bulletins** menu to open the introduction, name form, date picker, pet selector, or long Pet Care Guide. Both image galleries update their cell sizes when the available width changes. UIKit previews cover narrow cards and short windows.
+Use the **Bulletins** menu to select **Custom Card** or **Native Sheet**, then open the introduction, name form, date picker, pet selector, photo gallery, or long Pet Care Guide. Native sheets require iOS 26 or later. Both image galleries update their cell sizes when the available width changes. UIKit previews cover both presenters, narrow cards, and short windows.
 
 ## Resizing and iPhone Duo
 
-Cards adapt to the current view bounds and safe area. On iOS 27.1, a partially folded Duo places the whole card in one clear region beside the fold. Long content scrolls inside the card. Keyboard placement uses the local keyboard layout guide and the current item's keyboard policy.
+Custom cards adapt to the current view bounds and safe area. On iOS 27.1, a partially folded Duo places the whole custom card in one clear region beside the fold. Long content scrolls inside the card. Keyboard placement uses the local keyboard layout guide and the current item's keyboard policy.
+
+You can also use a native UIKit sheet on iOS 26 or later:
+
+```swift
+let manager = BLTNItemManager(rootItem: item)
+manager.presentationStyle = .nativeSheet
+manager.showBulletin(above: self)
+```
+
+The default remains `.custom`. A native-sheet request falls back to the custom card on older releases. Native mode uses system appearance, detents, scrolling, and keyboard behavior. On iOS 27 or later, it requests trailing placement for the Book posture. Tall native sheets can span a horizontal fold.
 
 See [Adaptive layout](guides/Adaptive%20Layout.md) for placement rules, customization, and validation.
 

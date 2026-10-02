@@ -6,6 +6,7 @@
 #if DEBUG
 import SwiftUI
 import UIKit
+import BLTNBoard
 import CustomBulletins
 
 @available(iOS 17, *)
@@ -36,5 +37,20 @@ import CustomBulletins
 @available(iOS 17, *)
 #Preview("Pet Care Guide — Short", traits: .fixedLayout(width: 568, height: 320)) {
     BulletinPreviewController(item: BulletinDataSource.makePetCarePage())
+}
+
+@available(iOS 26, *)
+#Preview("Native Sheet — Name", traits: .fixedLayout(width: 320, height: 568)) {
+    BulletinPreviewController(item: BulletinDataSource.makeTextFieldPage(), presentationStyle: .nativeSheet)
+}
+
+@available(iOS 26, *)
+#Preview("Native Sheet — Pet Photos", traits: .fixedLayout(width: 320, height: 568)) {
+    BulletinPreviewController(item: BulletinDataSource.makePetPhotosPage(), presentationStyle: .nativeSheet)
+}
+
+@available(iOS 26, *)
+#Preview("Native Sheet — Pet Care Guide", traits: .fixedLayout(width: 568, height: 320)) {
+    BulletinPreviewController(item: BulletinDataSource.makePetCarePage(), presentationStyle: .nativeSheet)
 }
 #endif

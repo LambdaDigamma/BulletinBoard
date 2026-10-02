@@ -1,8 +1,14 @@
 # _BulletinBoard_ Changelog
 ## Unreleased
 
+### New Features
+- Add optional native UIKit sheets on iOS 26 and later, with trailing placement on iOS 27 and a demo presenter selector. Keep the custom card as the default and as the fallback on older releases.
+[#1](https://github.com/LambdaDigamma/BulletinBoard/pull/1)
+
 ### Fixes
 - Keep bulletins clear of an active iPhone Duo fold, fit narrow and short regions, and scroll long content and keyboard forms. Adapt the demo controls and galleries to live width changes.
+[#1](https://github.com/LambdaDigamma/BulletinBoard/pull/1)
+- Preserve displayed controls during loading and clean up each active item once after dismissal. Ignore stale page-transition callbacks after dismissal.
 [#1](https://github.com/LambdaDigamma/BulletinBoard/pull/1)
 
 ### Changed Behavior

@@ -222,6 +222,18 @@ enum BulletinDataSource {
 
     }
 
+    /// Opens the image gallery without the preceding setup pages.
+    static func makePetPhotosPage() -> PetValidationBLTNItem {
+        let dataSource: CollectionDataSource = favoriteTabIndex == 0 ? .cat : .dog
+        let page = PetValidationBLTNItem(dataSource: dataSource,
+                                          animalType: dataSource == .cat ? "cats" : "dogs") { currentItem in
+            currentItem.manager?.push(item: makeCompletionPage())
+        }
+        page.alternativeButtonTitle = nil
+        page.isDismissable = true
+        return page
+    }
+
     /// A longer reading page that also demonstrates scrolling in a short card.
     static func makePetCarePage() -> BLTNPageItem {
         let page = BLTNPageItem(title: "Pet Care Guide")

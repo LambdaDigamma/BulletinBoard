@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		230826D54780769CCCB65F6B /* BLTNPresentationStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15E8F1EBEC30D278C0D42EE3 /* BLTNPresentationStyle.swift */; };
+		EDCEC86AF6F42A5FBA5FE043 /* BulletinContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F691D8AF52D2256F4F4CB3C /* BulletinContent.swift */; };
+		9ADE6DFA6DDFE4A5DD36BCA2 /* BulletinPresentationHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = E57F663CA6B8D5A1FA83D747 /* BulletinPresentationHost.swift */; };
+		778BD4EFC9DF01417CD73884 /* NativeBulletinViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28085C692BF4DB743FC3F3E7 /* NativeBulletinViewController.swift */; };
 		CF71A738AC7823940A1F9121 /* BulletinLayoutRegion.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF71A738AC7823940A1F9120 /* BulletinLayoutRegion.swift */; };
 		550675691F90A0A500874D8B /* BLTNBackgroundViewStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 550675681F90A0A500874D8B /* BLTNBackgroundViewStyle.swift */; };
 		551D2D9C1FC060EA0078DB21 /* BLTNItemAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 551D2D9B1FC060E90078DB21 /* BLTNItemAppearance.swift */; };
@@ -39,6 +43,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		15E8F1EBEC30D278C0D42EE3 /* BLTNPresentationStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLTNPresentationStyle.swift; sourceTree = "<group>"; };
+		3F691D8AF52D2256F4F4CB3C /* BulletinContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BulletinContent.swift; sourceTree = "<group>"; };
+		E57F663CA6B8D5A1FA83D747 /* BulletinPresentationHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BulletinPresentationHost.swift; sourceTree = "<group>"; };
+		28085C692BF4DB743FC3F3E7 /* NativeBulletinViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeBulletinViewController.swift; sourceTree = "<group>"; };
 		CF71A738AC7823940A1F9120 /* BulletinLayoutRegion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BulletinLayoutRegion.swift; sourceTree = "<group>"; };
 		52D6D97C1BEFF229002C0205 /* BLTNBoard.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BLTNBoard.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		550675681F90A0A500874D8B /* BLTNBackgroundViewStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLTNBackgroundViewStyle.swift; sourceTree = "<group>"; };
@@ -130,6 +138,7 @@
 		55B3D1D11FDD644300737791 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				15E8F1EBEC30D278C0D42EE3 /* BLTNPresentationStyle.swift */,
 				5E437A36248971BC009DBF9A /* BLTNItem.swift */,
 				5E437A3024894748009DBF9A /* BLTNActionItem.swift */,
 				5E437A3224894A27009DBF9A /* BLTNPageItem.swift */,
@@ -179,6 +188,9 @@
 		55DADEB81F8153B3001B11A2 /* Support */ = {
 			isa = PBXGroup;
 			children = (
+				3F691D8AF52D2256F4F4CB3C /* BulletinContent.swift */,
+				E57F663CA6B8D5A1FA83D747 /* BulletinPresentationHost.swift */,
+				28085C692BF4DB743FC3F3E7 /* NativeBulletinViewController.swift */,
 				558A122C1F7D73CD005EC97C /* BulletinViewController.swift */,
 				CF71A738AC7823940A1F9120 /* BulletinLayoutRegion.swift */,
 				55BDB0D220BAFB9C005A6C2B /* Helpers */,
@@ -324,6 +336,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				230826D54780769CCCB65F6B /* BLTNPresentationStyle.swift in Sources */,
+				EDCEC86AF6F42A5FBA5FE043 /* BulletinContent.swift in Sources */,
+				9ADE6DFA6DDFE4A5DD36BCA2 /* BulletinPresentationHost.swift in Sources */,
+				778BD4EFC9DF01417CD73884 /* NativeBulletinViewController.swift in Sources */,
 				558A12331F7D73CD005EC97C /* HighlightButton.swift in Sources */,
 				55DADE7A1F7D9428001B11A2 /* BLTNInterfaceBuilder.swift in Sources */,
 				55B3D1CF1FDADA8E00737791 /* AnimationChain.swift in Sources */,

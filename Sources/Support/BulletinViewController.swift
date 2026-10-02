@@ -9,7 +9,7 @@ import UIKit
  * A view controller that displays a card at the bottom of the screen.
  */
 
-final class BulletinViewController: UIViewController, UIGestureRecognizerDelegate {
+final class BulletinViewController: UIViewController, UIGestureRecognizerDelegate, BulletinPresentationHost {
 
     /// The object managing the view controller.
     weak var manager: BLTNItemManager?
@@ -19,8 +19,12 @@ final class BulletinViewController: UIViewController, UIGestureRecognizerDelegat
     /// The subview that contains the contents of the card.
     let contentView = RoundedView()
 
+    private let content = BulletinContent()
+
+    var contentContainer: UIView { contentView }
+
     /// The button that allows the users to close the bulletin.
-    let closeButton = BulletinCloseButton()
+    var closeButton: BulletinCloseButton { content.closeButton }
 
     /**
      * The stack view displaying the content of the card.
@@ -29,16 +33,16 @@ final class BulletinViewController: UIViewController, UIGestureRecognizerDelegat
      * may break the layout of the card.
      */
 
-    let contentStackView = UIStackView()
+    var contentStackView: UIStackView { content.stackView }
 
     /// Keeps every item reachable when the available region is shorter than the content.
-    let contentScrollView = UIScrollView()
+    var contentScrollView: UIScrollView { content.scrollView }
 
     /// The view covering the content. Generated in `loadBackgroundView`.
     var backgroundView: BulletinBackgroundView!
 
     /// The activity indicator.
-    let activityIndicator = ActivityIndicator()
+    var activityIndicator: ActivityIndicator { content.activityIndicator }
 
     // MARK: - Dismissal Support Properties
 
@@ -693,6 +697,20 @@ extension BulletinViewController: UIViewControllerTransitioningDelegate {
         swipeInteractionController = BulletinSwipeInteractionController()
         swipeInteractionController.wire(to: self)
 
+    }
+
+    func cancelInteractionIfNeeded() {
+        swipeInteractionController?.cancelIfNeeded()
+    }
+
+    func refreshInteraction() {
+        refreshSwipeInteractionController()
+    }
+
+    func cleanUpPresentation() {
+        backgroundView = nil
+        transitioningDelegate = nil
+        manager = nil
     }
 
     /// Prepares the view controller for dismissal.

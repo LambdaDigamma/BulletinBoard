@@ -13,8 +13,9 @@ final class BulletinPreviewController: UIViewController {
     private let manager: BLTNItemManager
     private var hasPresentedBulletin = false
 
-    init(item: BLTNItem) {
+    init(item: BLTNItem, presentationStyle: BLTNPresentationStyle = .custom) {
         manager = BLTNItemManager(rootItem: item)
+        manager.presentationStyle = presentationStyle
         super.init(nibName: nil, bundle: nil)
     }
 
