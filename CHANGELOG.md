@@ -1,6 +1,26 @@
 # _BulletinBoard_ Changelog
 ## Unreleased
 
+### New Features
+- Use native UIKit sheets on every supported release, from iOS 17. Keep one content-height stop and scroll long content. Request trailing placement on iOS 27 and use a solid adaptive sheet surface on iOS 26.1 and later.
+- Add seven debug-only framework Xcode previews for page-size transitions, actions, alerts, forms, loading, push/pop, scrolling, large text, dark mode, and right-to-left layout. Keep the fixtures independent of the demo app.
+- Animate sheet height during page changes and fade content out and in. Apply changes directly with Reduce Motion. Cancel stale transitions after a new page, loading, or dismissal.
+- Let the startup loading indicator adapt to light and dark mode.
+
+### Fixes
+- Use UIKit's navigation-bar Close item with standard appearance, accessibility, and interaction. Keep scrolling content below its fixed header.
+- Preserve controls and values during loading, show the spinner immediately if loading interrupts a fade, and clean up each active item once after dismissal.
+- Adapt demo controls and galleries to live width changes.
+
+### Changed Behavior
+- Require Xcode 27.1 or later and iOS 17 or later.
+- Remove the custom presenter, its fold-region selection, background options, corners, and gestures. UIKit controls sheet placement and keyboard movement. Tall native sheets can span a horizontal Duo fold.
+- Keep `presentationStyle` (including `.custom`), `backgroundColor`, `backgroundViewStyle`, `edgeSpacing`, `cardCornerRadius`, and `shouldRespondToKeyboardChanges` as deprecated compatibility settings with no effect.
+- Present scene bulletins from an existing application controller. Setting `allowsSwipeInteraction = false` also blocks native outside-tap dismissal.
+- Remove obsolete presenter and background selectors from the demo. Retain direct example entries and update all previews to native sheets.
+
+[#1](https://github.com/LambdaDigamma/BulletinBoard/pull/1)
+
 ## 🔖 v6.1.1
 ### Fixes
 - Prevent isolated destructor crashes on older iOS when UIKit releases animation objects outside a Swift task.

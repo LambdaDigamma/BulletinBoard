@@ -21,6 +21,10 @@ public class TextFieldBulletinPage: FeedbackPageBLTNItem {
 
     override public func makeViewsUnderDescription(with interfaceBuilder: BLTNInterfaceBuilder) -> [UIView]? {
         textField = interfaceBuilder.makeTextField(placeholder: "First and Last Name", returnKey: .done, delegate: self)
+        textField.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        textField.textContentType = .name
+        textField.autocapitalizationType = .words
+        textField.accessibilityLabel = "First and Last Name"
         return [textField]
     }
 

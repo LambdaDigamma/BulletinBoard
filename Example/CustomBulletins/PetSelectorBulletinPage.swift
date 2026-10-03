@@ -90,6 +90,7 @@ public class PetSelectorBulletinPage: FeedbackPageBLTNItem {
         button.accessibilityLabel = choice.title
 
         button.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+        button.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
 
         let heightConstraint = button.heightAnchor.constraint(equalToConstant: 55)
         heightConstraint.priority = .defaultHigh
@@ -138,6 +139,7 @@ public class PetSelectorBulletinPage: FeedbackPageBLTNItem {
         configuration.buttonSize = .large
         configuration.cornerStyle = .capsule
         configuration.titleAlignment = .center
+        configuration.titleLineBreakMode = .byWordWrapping
         configuration.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20)
         configuration.baseForegroundColor = isSelected ? appearance.actionButtonColor : .label
         configuration.automaticallyUpdateForSelection = false
@@ -169,6 +171,8 @@ public class PetSelectorBulletinPage: FeedbackPageBLTNItem {
         button.setTitleColor(isSelected ? appearance.actionButtonColor : .secondaryLabel, for: .normal)
         button.setTitleColor(isSelected ? appearance.actionButtonColor : .secondaryLabel, for: .selected)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .semibold)
+        button.titleLabel?.numberOfLines = 0
+        button.titleLabel?.lineBreakMode = .byWordWrapping
         button.backgroundColor = .clear
         button.layer.cornerRadius = 27.5
         button.layer.cornerCurve = .continuous

@@ -21,7 +21,7 @@ public class PetValidationBLTNItem: FeedbackPageBLTNItem {
     let selectionFeedbackGenerator = SelectionFeedbackGenerator()
     let successFeedbackGenerator = SuccessFeedbackGenerator()
 
-    init(dataSource: CollectionDataSource, animalType: String, validationHandler: @escaping (BLTNItem) -> Void) {
+    public init(dataSource: CollectionDataSource, animalType: String, validationHandler: @escaping (BLTNItem) -> Void) {
         self.dataSource = dataSource
         self.animalType = animalType
         self.validationHandler = validationHandler
@@ -40,14 +40,18 @@ public class PetValidationBLTNItem: FeedbackPageBLTNItem {
 
     override public func makeViewsUnderDescription(with interfaceBuilder: BLTNInterfaceBuilder) -> [UIView]? {
 
-        let flowLayout = UICollectionViewFlowLayout()
+        let flowLayout = ResizingCollectionViewFlowLayout()
         flowLayout.scrollDirection = .vertical
         flowLayout.minimumInteritemSpacing = 1
+        flowLayout.minimumLineSpacing = 1
 
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
         collectionView.backgroundColor = .white
+        collectionView.isScrollEnabled = false
+        collectionView.contentInsetAdjustmentBehavior = .never
+        collectionView.heightAnchor.constraint(equalTo: collectionView.widthAnchor).isActive = true
 
-        let collectionWrapper = interfaceBuilder.wrapView(collectionView, width: nil, height: 256, position: .pinnedToEdges)
+        let collectionWrapper = interfaceBuilder.wrapView(collectionView, width: nil, height: nil, position: .pinnedToEdges)
 
         self.collectionView = collectionView
         collectionView.register(ImageCollectionViewCell.self, forCellWithReuseIdentifier: "cell")
@@ -139,7 +143,10 @@ extension PetValidationBLTNItem: UICollectionViewDataSource, UICollectionViewDel
 
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
 
-        let squareSideLength = (collectionView.frame.width / 3) - 3
+        let flowLayout = collectionViewLayout as! UICollectionViewFlowLayout
+        let availableWidth = collectionView.bounds.width - collectionView.adjustedContentInset.left - collectionView.adjustedContentInset.right
+            - flowLayout.sectionInset.left - flowLayout.sectionInset.right
+        let squareSideLength = max(0, (availableWidth - 2 * flowLayout.minimumInteritemSpacing) / 3)
         return CGSize(width: squareSideLength, height: squareSideLength)
 
     }
