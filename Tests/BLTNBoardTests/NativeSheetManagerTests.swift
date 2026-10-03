@@ -426,7 +426,12 @@ final class NativeSheetManagerTests: XCTestCase {
         layout(controller)
         let originalFrame = button.convert(button.bounds, to: controller.view)
         let safeFrame = controller.view.safeAreaLayoutGuide.layoutFrame
-        XCTAssertEqual(safeFrame.maxY - originalFrame.maxY, 12, accuracy: 1)
+        XCTAssertLessThanOrEqual(originalFrame.maxY, safeFrame.maxY + 1)
+        if controller.view.safeAreaInsets.bottom >= 12 {
+            XCTAssertEqual(safeFrame.maxY, originalFrame.maxY, accuracy: 1)
+        } else {
+            XCTAssertEqual(controller.view.bounds.maxY - originalFrame.maxY, 12, accuracy: 1)
+        }
 
         let scroll = controller.contentScrollView
         let container = controller.contentContainer
@@ -443,7 +448,31 @@ final class NativeSheetManagerTests: XCTestCase {
         XCTAssertEqual(guideFrame.maxY, originalFrame.maxY, accuracy: 1)
         XCTAssertEqual(scroll.frame.maxY, safeFrame.maxY, accuracy: 1)
         XCTAssertEqual(scroll.adjustedContentInset.bottom, 0, accuracy: 1)
-        XCTAssertEqual(controller.view.safeAreaLayoutGuide.layoutFrame.maxY - guideFrame.maxY, 12, accuracy: 1)
+        XCTAssertLessThanOrEqual(guideFrame.maxY, controller.view.safeAreaLayoutGuide.layoutFrame.maxY + 1)
+        await dismiss(manager)
+    }
+
+    func testFloatingSheetRetainsMinimumBottomClearance() async throws {
+        let (window, parent) = try makePresenter()
+        defer { removePresenter(window) }
+        guard parent.traitCollection.horizontalSizeClass == .regular else {
+            throw XCTSkip("This check needs a regular-width floating sheet")
+        }
+        let page = BLTNPageItem(title: "Floating bulletin")
+        page.descriptionText = "Keep the final control clear of the rounded sheet edge."
+        page.actionButtonTitle = "Done"
+        page.requiresCloseButton = false
+        let manager = nativeManager(page)
+        await show(manager, above: parent)
+        let controller = try XCTUnwrap(manager.presentationController as? NativeBulletinViewController)
+        let button = try XCTUnwrap(page.actionButton)
+        layout(controller)
+        XCTAssertEqual(controller.view.safeAreaInsets.bottom, 0)
+        XCTAssertEqual(controller.contentScrollView.adjustedContentInset.bottom, 0)
+        let frame = button.convert(button.bounds, to: controller.view)
+        XCTAssertEqual(controller.view.bounds.maxY - frame.maxY, 12, accuracy: 1)
+        let hit = controller.view.hitTest(CGPoint(x: frame.midX, y: frame.midY), with: nil)
+        XCTAssertTrue(hit?.isDescendant(of: button) == true)
         await dismiss(manager)
     }
 

@@ -10,7 +10,7 @@
 ### Fixes
 - Use UIKit's navigation-bar Close item with standard appearance, accessibility, and interaction. Keep scrolling content below its fixed header.
 - Preserve controls and values during loading, show the spinner immediately if loading interrupts a fade, and clean up each active item once after dismissal.
-- Reduce the content bottom margin from 24 to 12 points while retaining UIKit safe-area clearance.
+- Replace fixed bottom padding with a 12-point minimum total clearance. Use UIKit safe-area clearance first and add only the remaining padding.
 - Adapt demo controls and galleries to live width changes.
 
 ### Changed Behavior

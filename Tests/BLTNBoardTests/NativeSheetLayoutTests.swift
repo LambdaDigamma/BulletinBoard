@@ -100,8 +100,10 @@ final class NativeSheetLayoutTests: XCTestCase {
         let controller = fixture.controller
         let scroll = controller.contentScrollView
         for insets in [UIEdgeInsets.zero,
+                       UIEdgeInsets(top: 0, left: 8, bottom: 6, right: 32),
                        UIEdgeInsets(top: 0, left: 32, bottom: 30, right: 8),
-                       UIEdgeInsets(top: 0, left: 8, bottom: 12, right: 32)] {
+                       UIEdgeInsets(top: 0, left: 8, bottom: 12, right: 32),
+                       UIEdgeInsets.zero] {
             controller.additionalSafeAreaInsets = insets
             layout(fixture)
             scroll.setContentOffset(CGPoint(x: -scroll.adjustedContentInset.left,
@@ -110,12 +112,58 @@ final class NativeSheetLayoutTests: XCTestCase {
             layout(fixture)
             let frame = action.convert(action.bounds, to: controller.view)
             let safeFrame = controller.view.safeAreaLayoutGuide.layoutFrame
-            XCTAssertEqual(safeFrame.maxY - frame.maxY, 12, accuracy: 1)
+            switch insets.bottom {
+            case 30, 12:
+                XCTAssertEqual(safeFrame.maxY, frame.maxY, accuracy: 1, "Use system clearance without an extra margin")
+            case 6:
+                XCTAssertEqual(safeFrame.maxY - frame.maxY, 6, accuracy: 1, "Complete the small inset to 12 points")
+            default:
+                XCTAssertEqual(controller.view.bounds.maxY - frame.maxY, 12, accuracy: 1, "Retain clearance without a system inset")
+            }
+            XCTAssertLessThanOrEqual(frame.maxY, safeFrame.maxY + 1)
             XCTAssertGreaterThanOrEqual(frame.minX, safeFrame.minX)
             XCTAssertLessThanOrEqual(frame.maxX, safeFrame.maxX)
             let hit = controller.view.hitTest(CGPoint(x: frame.midX, y: frame.midY), with: nil)
             XCTAssertTrue(hit?.isDescendant(of: action) == true)
         }
+    }
+
+    func testBottomClearanceUpdatesDuringDeferredPageLayoutAndLoading() throws {
+        let content = UIView()
+        content.heightAnchor.constraint(equalToConstant: 900).isActive = true
+        let action = UIButton(type: .system)
+        action.setTitle("Done", for: .normal)
+        action.heightAnchor.constraint(equalToConstant: 44).isActive = true
+        let fixture = makeFixture(size: CGSize(width: 360, height: 280), content: [content, action])
+        defer { removeFixture(fixture) }
+        fixture.manager.currentItem.requiresCloseButton = false
+        let controller = fixture.controller
+        let originalHeight = controller.measuredContentHeight
+
+        controller.beginItemTransition(animated: false)
+        controller.additionalSafeAreaInsets.bottom = 30
+        layout(fixture)
+        XCTAssertEqual(controller.measuredContentHeight, originalHeight, accuracy: 0.5)
+        var displayed = false
+        controller.finishItemTransition(willDisplay: { true }, completion: { displayed = true })
+        layout(fixture)
+        XCTAssertTrue(displayed)
+        XCTAssertEqual(controller.measuredContentHeight, originalHeight - 12, accuracy: 0.5)
+
+        let loadingHeight = controller.measuredContentHeight
+        controller.displayActivityIndicator(color: .label)
+        controller.additionalSafeAreaInsets.bottom = 0
+        layout(fixture)
+        XCTAssertEqual(controller.measuredContentHeight, loadingHeight, accuracy: 0.5)
+        controller.hideActivityIndicator()
+        layout(fixture)
+        XCTAssertEqual(controller.measuredContentHeight, originalHeight, accuracy: 0.5)
+        let scroll = controller.contentScrollView
+        scroll.setContentOffset(CGPoint(x: 0, y: scroll.contentSize.height - scroll.bounds.height), animated: false)
+        layout(fixture)
+        let frame = action.convert(action.bounds, to: controller.view)
+        XCTAssertEqual(controller.view.bounds.maxY - frame.maxY, 12, accuracy: 1)
+        XCTAssertEqual(controller.contentStackView.alpha, 1)
     }
 
     func testDynamicTypeChangeUpdatesTheNativeContentHeight() throws {

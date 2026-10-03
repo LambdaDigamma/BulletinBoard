@@ -19,6 +19,7 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
     private(set) var measuredContentHeight: CGFloat = 0
     private var contentWidthConstraint: NSLayoutConstraint!
     private var stackTopConstraint: NSLayoutConstraint!
+    private var stackBottomConstraint: NSLayoutConstraint!
     private var scrollTopConstraint: NSLayoutConstraint!
     private var reservesCloseButton = false
     private var isDisplayingActivityIndicator = false
@@ -32,7 +33,7 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
     private var outgoingSnapshot: UIView?
 
     private static let contentDetentIdentifier = UISheetPresentationController.Detent.Identifier("bulletinContent")
-    private static let contentBottomMargin: CGFloat = 12
+    private static let minimumBottomClearance: CGFloat = 12
 
     init() {
         super.init(nibName: nil, bundle: nil)
@@ -105,11 +106,13 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
         contentScrollView.addSubview(contentStackView)
         contentStackView.spacing = 24
         stackTopConstraint = contentStackView.topAnchor.constraint(equalTo: contentScrollView.contentLayoutGuide.topAnchor, constant: 32)
+        stackBottomConstraint = contentStackView.bottomAnchor.constraint(equalTo: contentScrollView.contentLayoutGuide.bottomAnchor,
+                                                                        constant: -Self.minimumBottomClearance)
         NSLayoutConstraint.activate([
             contentStackView.leadingAnchor.constraint(equalTo: contentScrollView.contentLayoutGuide.leadingAnchor, constant: 24),
             contentStackView.trailingAnchor.constraint(equalTo: contentScrollView.contentLayoutGuide.trailingAnchor, constant: -24),
             stackTopConstraint,
-            contentStackView.bottomAnchor.constraint(equalTo: contentScrollView.contentLayoutGuide.bottomAnchor, constant: -Self.contentBottomMargin),
+            stackBottomConstraint,
         ])
 
         contentContainer.addSubview(activityIndicator)
@@ -141,7 +144,8 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         updateHeaderHeight()
-        updateContentHeight()
+        updateBottomClearance()
+        updateContentHeight(animated: isTransitioningItem && animatesItemTransition && UIView.areAnimationsEnabled)
     }
 
     override func viewSafeAreaInsetsDidChange() {
@@ -181,6 +185,14 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
         setMeasuredContentHeight(height, animated: animated)
     }
 
+    private func updateBottomClearance() {
+        // The safe area supplies the clearance when it is large enough.
+        let padding = max(0, Self.minimumBottomClearance - contentContainer.safeAreaInsets.bottom)
+        guard stackBottomConstraint.constant != -padding else { return }
+        stackBottomConstraint.constant = -padding
+        view.setNeedsLayout()
+    }
+
     private func contentHeight(for width: CGFloat) -> CGFloat {
         let stackHeight = contentStackView.systemLayoutSizeFitting(
             CGSize(width: width, height: UIView.layoutFittingCompressedSize.height),
@@ -188,7 +200,7 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
             verticalFittingPriority: .fittingSizeLevel
         ).height
         // A custom detent excludes the bottom safe area; UIKit adds it to an edge-attached sheet.
-        let height = max(1, stackHeight + scrollTopConstraint.constant + stackTopConstraint.constant + Self.contentBottomMargin)
+        let height = max(1, stackHeight + scrollTopConstraint.constant + stackTopConstraint.constant - stackBottomConstraint.constant)
         let scale = max(1, traitCollection.displayScale)
         return ceil(height * scale) / scale
     }
