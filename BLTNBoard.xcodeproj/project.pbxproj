@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E4AA855DDF89AD77E5FA4B6B /* FrameworkBulletinPreviews.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEA0D599EC9FFA84D44B02E5 /* FrameworkBulletinPreviews.swift */; };
+		F457F26D6D4E2DE745F9252C /* FrameworkPreviewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C839D82B4FB3FC80ADC41E8C /* FrameworkPreviewController.swift */; };
+		2A7C87A7325B5465D0D9790F /* FrameworkPreviewFormItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CF44074713B03105B86482B /* FrameworkPreviewFormItem.swift */; };
+		BD54FBC45FA658FF63E94A95 /* FrameworkPreviewScenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCE19B83BF3EE3BBA860A40E /* FrameworkPreviewScenario.swift */; };
 		230826D54780769CCCB65F6B /* BLTNPresentationStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15E8F1EBEC30D278C0D42EE3 /* BLTNPresentationStyle.swift */; };
 		EDCEC86AF6F42A5FBA5FE043 /* BulletinContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F691D8AF52D2256F4F4CB3C /* BulletinContent.swift */; };
 		9ADE6DFA6DDFE4A5DD36BCA2 /* BulletinPresentationHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = E57F663CA6B8D5A1FA83D747 /* BulletinPresentationHost.swift */; };
@@ -43,6 +47,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		BEA0D599EC9FFA84D44B02E5 /* FrameworkBulletinPreviews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameworkBulletinPreviews.swift; sourceTree = "<group>"; };
+		C839D82B4FB3FC80ADC41E8C /* FrameworkPreviewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameworkPreviewController.swift; sourceTree = "<group>"; };
+		0CF44074713B03105B86482B /* FrameworkPreviewFormItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameworkPreviewFormItem.swift; sourceTree = "<group>"; };
+		FCE19B83BF3EE3BBA860A40E /* FrameworkPreviewScenario.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameworkPreviewScenario.swift; sourceTree = "<group>"; };
 		15E8F1EBEC30D278C0D42EE3 /* BLTNPresentationStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLTNPresentationStyle.swift; sourceTree = "<group>"; };
 		3F691D8AF52D2256F4F4CB3C /* BulletinContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BulletinContent.swift; sourceTree = "<group>"; };
 		E57F663CA6B8D5A1FA83D747 /* BulletinPresentationHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BulletinPresentationHost.swift; sourceTree = "<group>"; };
@@ -92,6 +100,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3584AB18F9DFC064BF0B13F8 /* Previews */ = {
+			isa = PBXGroup;
+			children = (
+				BEA0D599EC9FFA84D44B02E5 /* FrameworkBulletinPreviews.swift */,
+				C839D82B4FB3FC80ADC41E8C /* FrameworkPreviewController.swift */,
+				0CF44074713B03105B86482B /* FrameworkPreviewFormItem.swift */,
+				FCE19B83BF3EE3BBA860A40E /* FrameworkPreviewScenario.swift */,
+			);
+			path = Previews;
+			sourceTree = "<group>";
+		};
 		52D6D9721BEFF229002C0205 = {
 			isa = PBXGroup;
 			children = (
@@ -213,6 +232,7 @@
 		8933C7811EB5B7E0000D00A4 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				3584AB18F9DFC064BF0B13F8 /* Previews */,
 				558A122A1F7D73CD005EC97C /* BLTNItemManager.swift */,
 				55BDB08820B9BF25005A6C2B /* Deprecations.swift */,
 				55B3D1D11FDD644300737791 /* Models */,
@@ -336,6 +356,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E4AA855DDF89AD77E5FA4B6B /* FrameworkBulletinPreviews.swift in Sources */,
+				F457F26D6D4E2DE745F9252C /* FrameworkPreviewController.swift in Sources */,
+				2A7C87A7325B5465D0D9790F /* FrameworkPreviewFormItem.swift in Sources */,
+				BD54FBC45FA658FF63E94A95 /* FrameworkPreviewScenario.swift in Sources */,
 				230826D54780769CCCB65F6B /* BLTNPresentationStyle.swift in Sources */,
 				EDCEC86AF6F42A5FBA5FE043 /* BulletinContent.swift in Sources */,
 				9ADE6DFA6DDFE4A5DD36BCA2 /* BulletinPresentationHost.swift in Sources */,

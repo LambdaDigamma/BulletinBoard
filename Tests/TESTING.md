@@ -28,6 +28,12 @@ The region tests cover vertical and horizontal divisions, right-to-left layout, 
 
 Repeat the affected UIKit and lifetime tests on an older supported iOS runtime to check availability guards. Use the [Duo demo checks](../guides/Adaptive%20Layout.md) to verify live fold, keyboard, and nested gallery interactions. The Swift package test target does not build the demo targets, so gallery resizing is checked in the demo app.
 
+## Framework preview fixture check
+
+Run `Scripts/test-ios.sh` with `-only-testing:BLTNBoardTests/FrameworkPreviewTests` to check that an edited name survives preview form teardown and view creation. Use the [framework preview steps](../guides/Framework%20Previews.md) for live alert, loading, navigation, dismissal, and scrolling checks. These fixtures are debug-only and do not depend on the demo app.
+
+Run `Scripts/test-ios-hosted.sh` with `SWIFT_ACTIVE_COMPILATION_CONDITIONS=DEBUG` and the same test filter to also check that explicit preview traits reach a bulletin presented outside the host controller's hierarchy. This check needs an application scene and skips in the standalone package test process.
+
 ## Native sheet checks
 
 ```sh

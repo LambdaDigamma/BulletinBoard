@@ -2,6 +2,7 @@
 ## Unreleased
 
 ### New Features
+- Add ten debug-only framework Xcode previews for actions, alerts, forms, loading, push/pop, scrolling, large text, right-to-left layout, and both presenters. Keep the fixtures independent of the demo app.
 - Add optional native UIKit sheets on iOS 26 and later, with trailing placement on iOS 27 and a demo presenter selector. Keep the custom card as the default and as the fallback on older releases.
 - Use one content-height stop for native sheets and a solid light/dark system surface on iOS 26.1 and later, so photos behind the sheet do not reduce text contrast.
 - Let the startup loading indicator adapt to light and dark mode, as the default indicator already does when loading starts later.

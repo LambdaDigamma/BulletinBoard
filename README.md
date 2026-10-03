@@ -32,6 +32,12 @@ Build and run the `BB-Swift` scheme to open the demo app.
 
 Use the **Bulletins** menu to select **Custom Card** or **Native Sheet**, then open the introduction, name form, date picker, pet selector, photo gallery, or long Pet Care Guide. Native sheets require iOS 26 or later. Both image galleries update their cell sizes when the available width changes. UIKit previews cover both presenters, narrow cards, and short windows.
 
+## Framework previews
+
+Open `Sources/Previews/FrameworkBulletinPreviews.swift` with the `BLTNBoard` scheme selected. Show the Xcode canvas and enable Live mode to use the bulletin buttons. These previews belong to the framework and Swift package; they do not need the demo app.
+
+The previews cover alerts, dismissal and reopening, a text field, loading, push/pop, long content, large text, right-to-left layout, and native sheets in light and dark mode. See [Framework previews](guides/Framework%20Previews.md) for the check steps and runtime limits.
+
 ## Resizing and iPhone Duo
 
 Custom cards adapt to the current view bounds and safe area. On iOS 27.1, a partially folded Duo places the whole custom card in one clear region beside the fold. Long content scrolls inside the card. Keyboard placement uses the local keyboard layout guide and the current item's keyboard policy.
