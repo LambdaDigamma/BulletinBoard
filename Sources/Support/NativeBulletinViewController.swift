@@ -67,7 +67,8 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
         super.loadView()
         // Keep text readable over photos at every sheet height and in both color schemes.
         view.backgroundColor = .systemBackground
-        contentContainer.backgroundColor = .clear
+        // Keep the content surface opaque during system sheet appearance changes.
+        contentContainer.backgroundColor = .systemBackground
         contentContainer.accessibilityViewIsModal = true
         contentContainer.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(contentContainer)
