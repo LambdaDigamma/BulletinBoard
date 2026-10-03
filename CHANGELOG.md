@@ -15,6 +15,7 @@
 
 ### Changed Behavior
 - Require Xcode 27.1 or later and iOS 17 or later.
+- Request home-indicator auto-hide by default. Set `hidesHomeIndicator = false` before presentation to request a visible indicator. UIKit controls its actual visibility.
 - Remove the custom presenter, its fold-region selection, background options, corners, and gestures. UIKit controls sheet placement and keyboard movement. Tall native sheets can span a horizontal Duo fold.
 - Keep `presentationStyle` (including `.custom`), `backgroundColor`, `backgroundViewStyle`, `edgeSpacing`, `cardCornerRadius`, and `shouldRespondToKeyboardChanges` as deprecated compatibility settings with no effect.
 - Present scene bulletins from an existing application controller. Setting `allowsSwipeInteraction = false` also blocks native outside-tap dismissal.

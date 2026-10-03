@@ -56,13 +56,13 @@ public final class BLTNItemManager {
     public var statusBarAnimation: UIStatusBarAnimation = .fade
 
     /**
-     * Whether the home indicator should be hidden. Defaults to false.
+     * Whether UIKit may auto-hide the home indicator. Defaults to true.
      * UIKit applies this preference according to its page-sheet presentation rules.
      *
      * Set this value before presenting the bulletin. Changing it after will have no effect.
      */
 
-    public var hidesHomeIndicator: Bool = false
+    public var hidesHomeIndicator: Bool = true
 
     // MARK: - Card Presentation
 

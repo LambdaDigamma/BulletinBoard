@@ -68,7 +68,7 @@ The custom presenter has been removed. These properties remain for source compat
 
 The enum cases and raw values remain unchanged so existing switches still compile. Public `AnimationChain` and `AnimationPhase` utilities also remain available.
 
-`allowsSwipeInteraction = false` blocks UIKit interactive dismissal, including outside taps. Explicit actions and Close can still dismiss an item that permits dismissal. Status-bar and home-indicator settings remain available, but their effect follows UIKit's page-sheet presentation rules. `withContentView` still exposes the content container; it has no custom rounded-card layer.
+`allowsSwipeInteraction = false` blocks UIKit interactive dismissal, including outside taps. Explicit actions and Close can still dismiss an item that permits dismissal. Status-bar and home-indicator settings remain available, but their effect follows UIKit's page-sheet presentation rules. Home-indicator auto-hide is enabled by default. Set `hidesHomeIndicator = false` before presentation to request a visible indicator. UIKit controls its actual visibility; safe-area clearance stays in place. `withContentView` still exposes the content container; it has no custom rounded-card layer.
 
 `showBulletin(in: windowScene)` presents from an existing visible controller in that scene. Use `showBulletin(above:)` for a specific presenter.
 

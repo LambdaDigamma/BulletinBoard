@@ -11,7 +11,20 @@ final class NativeSheetManagerTests: XCTestCase {
         let manager = BLTNItemManager(rootItem: NativeSheetTrackingItem())
         await show(manager, above: parent)
 
-        XCTAssertTrue(manager.presentationController is NativeBulletinViewController)
+        let controller = try XCTUnwrap(manager.presentationController as? NativeBulletinViewController)
+        XCTAssertTrue(controller.prefersHomeIndicatorAutoHidden)
+        await dismiss(manager)
+    }
+
+    func testExplicitHomeIndicatorPreferenceKeepsIndicatorVisible() async throws {
+        let (window, parent) = try makePresenter()
+        defer { removePresenter(window) }
+        let manager = BLTNItemManager(rootItem: NativeSheetTrackingItem())
+        manager.hidesHomeIndicator = false
+        await show(manager, above: parent)
+
+        let controller = try XCTUnwrap(manager.presentationController as? NativeBulletinViewController)
+        XCTAssertFalse(controller.prefersHomeIndicatorAutoHidden)
         await dismiss(manager)
     }
 
