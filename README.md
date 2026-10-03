@@ -5,7 +5,7 @@
 
 BulletinBoard is an iOS library that generates and manages contextual cards displayed at the bottom of the screen. It is especially well suited for quick user interactions such as onboarding screens or configuration.
 
-It has an interface similar to the cards displayed by iOS for AirPods, Apple TV/HomePod configuration and NFC tag scanning. It supports both the iPhone, iPhone X and the iPad.
+It has an interface similar to the cards displayed by iOS for AirPods, Apple TV/HomePod configuration and NFC tag scanning. It supports iPhone, iPhone Duo, and iPad.
 
 It has built-in support for accessibility features such as VoiceOver and Switch Control.
 
@@ -15,8 +15,8 @@ Here are some screenshots showing what you can build with BulletinBoard:
 
 ## Requirements
 
-- Xcode 26 and later
-- iOS 15 and later
+- Xcode 27.1 and later
+- iOS 17 and later
 - Swift 6 language mode with SwiftPM PackageDescription 6.2 or later.
 
 ## Demo
@@ -29,6 +29,27 @@ A demo project is included in the `BulletinBoard` workspace. It demonstrates how
 - create custom cards from scratch
 
 Build and run the `BB-Swift` scheme to open the demo app.
+
+Use the **Bulletins** menu to open the introduction, name form, date picker, pet selector, photo gallery, or long Pet Care Guide. All examples use native sheets on iOS 17 and later. Both image galleries update their cell sizes when the available width changes. UIKit previews cover narrow and short windows, dark mode, loading, and page transitions.
+
+## Framework previews
+
+Open `Sources/Previews/FrameworkBulletinPreviews.swift` with the `BLTNBoard` scheme selected. Show the Xcode canvas and enable Live mode to use the bulletin buttons. These previews belong to the framework and Swift package; they do not need the demo app.
+
+The previews cover alerts, dismissal and reopening, a text field, loading, push/pop, long content, large text, right-to-left layout, and native sheets in light and dark mode. See [Framework previews](guides/Framework%20Previews.md) for the check steps and runtime limits.
+
+## Resizing and iPhone Duo
+
+BulletinBoard uses native UIKit sheets on every supported iOS release. Each sheet has one content-height stop. Long content scrolls, and UIKit handles keyboard movement. Page changes fade out the old content, animate the sheet height, and fade in the new content. Reduce Motion applies the new page without animation.
+
+```swift
+let manager = BLTNItemManager(rootItem: item)
+manager.showBulletin(above: self)
+```
+
+The content background adapts to light and dark mode. On iOS 26.1 and later, the sheet also replaces the system glass surface with a solid background. On iOS 27 and later, it requests trailing placement for the Book posture. Tall native sheets can span a horizontal fold; content and actions remain scrollable.
+
+The custom presenter was removed. `presentationStyle`, `backgroundColor`, `backgroundViewStyle`, `edgeSpacing`, `cardCornerRadius`, and `shouldRespondToKeyboardChanges` remain as deprecated compatibility settings and have no effect. UIKit controls sheet appearance and placement. See [Adaptive layout](guides/Adaptive%20Layout.md) for behavior, migration details, and validation.
 
 ## Installation
 

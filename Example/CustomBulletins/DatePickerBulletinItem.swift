@@ -19,6 +19,9 @@ public class DatePickerBLTNItem: BLTNPageItem {
     
     override public func makeViewsUnderDescription(with interfaceBuilder: BLTNInterfaceBuilder) -> [UIView]? {
         datePicker.datePickerMode = .date
+        datePicker.preferredDatePickerStyle = .compact
+        datePicker.accessibilityLabel = title
+        datePicker.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         return [datePicker]
     }
 }

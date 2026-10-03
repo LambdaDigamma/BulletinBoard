@@ -15,7 +15,6 @@ import CustomBulletins
 
 class ViewController: UIViewController {
 
-    @IBOutlet weak var styleButtonItem: UIBarButtonItem!
     @IBOutlet weak var segmentedControl: UISegmentedControl!
     @IBOutlet weak var showIntoButtonItem: UIBarButtonItem!
     @IBOutlet weak var collectionView: UICollectionView!
@@ -26,13 +25,7 @@ class ViewController: UIViewController {
     /// Whether the status bar should be hidden.
     private var shouldHideStatusBar: Bool = false
 
-    // MARK: - Customization
-
-    /// The available background styles.
-    let backgroundStyles = BackgroundStyles()
-
-    /// The current background style.
-    var currentBackground = (name: "Dimmed", style: BLTNBackgroundViewStyle.dimmed)
+    private var didCheckInitialBulletin = false
 
     // MARK: - Bulletin Manager
 
@@ -43,10 +36,7 @@ class ViewController: UIViewController {
      * the bulletin manager.
      */
 
-    lazy var bulletinManager: BLTNItemManager = {
-        let introPage = BulletinDataSource.makeIntroPage()
-        return BLTNItemManager(rootItem: introPage)
-    }()
+    lazy var bulletinManager = makeBulletinManager(rootItem: BulletinDataSource.makeIntroPage())
 
     // MARK: - View
 
@@ -61,7 +51,7 @@ class ViewController: UIViewController {
         segmentedControl.selectedSegmentIndex = favoriteTab
         dataSource = favoriteTab == 0 ? .cat : .dog
 
-        styleButtonItem.title = currentBackground.name
+        configureBulletinMenu()
 
         // Set up the collection view
 
@@ -79,6 +69,17 @@ class ViewController: UIViewController {
         collectionView.contentInset.top = 8
         collectionView.contentInset.bottom = 8
 
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        guard !didCheckInitialBulletin else { return }
+        didCheckInitialBulletin = true
+
+        if !BulletinDataSource.userDidCompleteSetup {
+            showBulletin()
+        }
     }
 
     deinit {
@@ -120,12 +121,6 @@ class ViewController: UIViewController {
         navigationController?.isToolbarHidden = false
         toolbarItems = [fontItem, statusBarItem]
 
-        // If the user did not complete the setup, present the bulletin automatically
-
-        if !BulletinDataSource.userDidCompleteSetup {
-            showBulletin()
-        }
-
     }
 
     /**
@@ -133,56 +128,56 @@ class ViewController: UIViewController {
      */
 
     func showBulletin() {
+        showBulletin(item: BulletinDataSource.makeIntroPage())
+    }
 
-        reloadManager()
+    private func showBulletin(item: BLTNItem) {
 
-//        Uncomment to customize interface
-//        bulletinManager.cardCornerRadius = 22
-//        bulletinManager.edgeSpacing = .none
-//        bulletinManager.allowsSwipeInteraction = false
-//        bulletinManager.hidesHomeIndicator = true
-//        bulletinManager.backgroundColor = .blue
+        bulletinManager = makeBulletinManager(rootItem: item)
 
-        bulletinManager.backgroundViewStyle = currentBackground.style
         bulletinManager.statusBarAppearance = shouldHideStatusBar ? .hidden : .automatic
         bulletinManager.showBulletin(above: self)
 
     }
 
+    private func makeBulletinManager(rootItem: BLTNItem) -> BLTNItemManager {
+        BLTNItemManager(rootItem: rootItem)
+    }
+
+    private func configureBulletinMenu() {
+        showIntoButtonItem.title = "Bulletins"
+        showIntoButtonItem.target = nil
+        showIntoButtonItem.action = nil
+        showIntoButtonItem.menu = UIMenu(children: [
+            UIMenu(title: "Examples", options: .displayInline, children: [
+                UIAction(title: "Introduction") { [weak self] _ in
+                    self?.showBulletin()
+                },
+                UIAction(title: "Enter Name") { [weak self] _ in
+                    self?.showBulletin(item: BulletinDataSource.makeTextFieldPage())
+                },
+                UIAction(title: "Birth Date") { [weak self] _ in
+                    self?.showBulletin(item: BulletinDataSource.makeDatePage(userName: nil))
+                },
+                UIAction(title: "Favorite Pets") { [weak self] _ in
+                    self?.showBulletin(item: BulletinDataSource.makeChoicePage())
+                },
+                UIAction(title: "Pet Photos") { [weak self] _ in
+                    self?.showBulletin(item: BulletinDataSource.makePetPhotosPage())
+                },
+                UIAction(title: "Pet Care Guide") { [weak self] _ in
+                    self?.showBulletin(item: BulletinDataSource.makePetCarePage())
+                }
+            ])
+        ])
+    }
+
     func reloadManager() {
         let introPage = BulletinDataSource.makeIntroPage()
-        bulletinManager = BLTNItemManager(rootItem: introPage)
+        bulletinManager = makeBulletinManager(rootItem: introPage)
     }
 
     // MARK: - Actions
-
-    @IBAction func styleButtonTapped(_ sender: Any) {
-
-        let styleSelectorSheet = UIAlertController(title: "Bulletin Background Style",
-                                                   message: nil,
-                                                   preferredStyle: .actionSheet)
-
-        for backgroundStyle in backgroundStyles {
-
-            let action = UIAlertAction(title: backgroundStyle.name, style: .default) { _ in
-                self.styleButtonItem.title = backgroundStyle.name
-                self.currentBackground = backgroundStyle
-            }
-
-            let isSelected = backgroundStyle.name == currentBackground.name
-            action.setValue(isSelected, forKey: "checked")
-
-            styleSelectorSheet.addAction(action)
-
-        }
-
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-        styleSelectorSheet.addAction(cancelAction)
-
-        styleSelectorSheet.popoverPresentationController?.barButtonItem = styleButtonItem
-        present(styleSelectorSheet, animated: true)
-
-    }
 
     @IBAction func showIntroButtonTapped(_ sender: UIBarButtonItem) {
         showBulletin()
@@ -262,7 +257,7 @@ extension ViewController: UICollectionViewDataSource, UICollectionViewDelegate, 
         let image = dataSource.image(at: indexPath.row)
         let aspectRatio = image.size.height / image.size.width
 
-        let width = collectionView.frame.width
+        let width = max(0, collectionView.bounds.width - collectionView.adjustedContentInset.left - collectionView.adjustedContentInset.right)
         let height = width * aspectRatio
 
         return CGSize(width: width, height: height)

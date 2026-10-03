@@ -21,7 +21,7 @@
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="YHu-o9-ydd">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="uVx-ca-Gdt">
+                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="uVx-ca-Gdt" customClass="ResizingCollectionViewFlowLayout" customModule="CustomBulletins">
                                     <size key="itemSize" width="317" height="50"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
                                     <size key="footerReferenceSize" width="0.0" height="0.0"/>
@@ -50,11 +50,6 @@
                     </view>
                     <navigationItem key="navigationItem" id="cae-YT-ehs">
                         <nil key="title"/>
-                        <barButtonItem key="leftBarButtonItem" title="%@STYLE%@" id="euD-bA-1s9">
-                            <connections>
-                                <action selector="styleButtonTapped:" destination="BYZ-38-t0r" id="1rg-Du-hGB"/>
-                            </connections>
-                        </barButtonItem>
                         <segmentedControl key="titleView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="bar" selectedSegmentIndex="0" id="nJY-e8-Bxo">
                             <rect key="frame" x="141" y="7" width="93" height="30"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -76,7 +71,6 @@
                         <outlet property="collectionView" destination="YHu-o9-ydd" id="rNj-Cu-gIm"/>
                         <outlet property="segmentedControl" destination="nJY-e8-Bxo" id="yMc-mY-K37"/>
                         <outlet property="showIntoButtonItem" destination="EpR-v7-nqd" id="JpO-bg-kRh"/>
-                        <outlet property="styleButtonItem" destination="euD-bA-1s9" id="kdp-XB-EEC"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

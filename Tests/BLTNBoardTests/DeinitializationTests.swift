@@ -58,12 +58,10 @@ final class DeinitializationTests: XCTestCase {
             DispatchQueue.main.async {
                 withUnsafeCurrentTask { XCTAssertNil($0) }
                 DeinitializationTaskLocal.$marker.withValue(17) {
-                    var controller: BulletinViewController? = BulletinViewController()
-                    controller?.setUpKeyboardLogic()
+                    var controller: NativeBulletinViewController? = NativeBulletinViewController()
                     weak let releasedController = controller
                     controller = nil
                     XCTAssertNil(releasedController)
-                    NotificationCenter.default.post(name: UIResponder.keyboardWillShowNotification, object: nil)
                     XCTAssertEqual(DeinitializationTaskLocal.marker, 17)
                 }
                 XCTAssertEqual(DeinitializationTaskLocal.marker, 0)
