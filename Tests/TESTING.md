@@ -45,3 +45,29 @@ The hosted script generates a small scene-based app and test project under the i
 Repeat these focused tests on an older runtime. Every supported release uses the native presenter; there is no custom fallback.
 
 Use the framework Page Size Transitions preview and demo for visual checks. Sampled intermediate heights prove runtime sheet movement; they do not prove visual quality, Reduce Motion settings, software-keyboard behavior, or fold placement. Check these separately. Native trailing placement requires iOS 27; a tall native sheet can span a horizontal fold.
+
+## Xcode project checks
+
+The standalone framework target uses the synchronized `Sources` folder. New Swift files in that folder join the target without manual source references. The demo uses the local Swift package and imports `CustomBulletins` as a Swift module. `CustomBulletins` has no Clang module or public generated Objective-C header; its Clang module verifier is disabled. The standalone framework keeps module verification enabled.
+
+```mermaid
+flowchart LR
+    Sources[Sources folder] -->|Synchronized target membership| Framework[Standalone BLTNBoard framework]
+    Sources -->|Swift package target| Package[BLTNBoard Swift module]
+    Package -->|Swift dependency| Custom[CustomBulletins Swift module]
+    Custom -->|Swift import| Demo[BB-Swift demo]
+    Verifier[Clang module verifier] -->|Checks public headers| Framework
+```
+
+After a project or scheme change, build the framework and demo in Debug and Release. Use separate derived-data directories to preserve an active Xcode run. For example:
+
+```sh
+xcodebuild -project BLTNBoard.xcodeproj -scheme BLTNBoard -configuration Debug \
+    -destination 'generic/platform=iOS Simulator' \
+    -derivedDataPath .build/FrameworkProjectCheck CODE_SIGNING_ALLOWED=NO build
+xcodebuild -workspace BulletinBoard.xcworkspace -scheme BB-Swift -configuration Debug \
+    -destination 'generic/platform=iOS Simulator' \
+    -derivedDataPath .build/DemoProjectCheck CODE_SIGNING_ALLOWED=NO build
+```
+
+Repeat with `-configuration Release`. Check the product's `MinimumOSVersion` remains `17.0`. These build checks do not replace the live preview and Duo checks in the guides. Keep unresolved environment and toolchain observations in `PAPERCUTS.md`.

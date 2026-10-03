@@ -12,9 +12,11 @@
 - Preserve controls and values during loading, show the spinner immediately if loading interrupts a fade, and clean up each active item once after dismissal.
 - Replace fixed bottom padding with a 12-point minimum total clearance. Use UIKit safe-area clearance first and add only the remaining padding.
 - Adapt demo controls and galleries to live width changes.
+- Fix the demo framework build settings for its Swift-only dependencies.
 
 ### Changed Behavior
 - Require Xcode 27.1 or later and iOS 17 or later.
+- Use a synchronized `Sources` folder in the standalone framework project and apply the Xcode 27.1 project and scheme updates.
 - Request home-indicator auto-hide by default. Set `hidesHomeIndicator = false` before presentation to request a visible indicator. UIKit controls its actual visibility.
 - Remove the custom presenter, its fold-region selection, background options, corners, and gestures. UIKit controls sheet placement and keyboard movement. Tall native sheets can span a horizontal Duo fold.
 - Keep `presentationStyle` (including `.custom`), `backgroundColor`, `backgroundViewStyle`, `edgeSpacing`, `cardCornerRadius`, and `shouldRespondToKeyboardChanges` as deprecated compatibility settings with no effect.

@@ -8,8 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		551CF5F81FBF8492007DFEEA /* Main-Swift.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 55D7021C1FBCCA1A00835D8A /* Main-Swift.storyboard */; };
-		55D7021F1FBCCA1A00835D8A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 55D7021A1FBCCA1A00835D8A /* LaunchScreen.storyboard */; };
-		55D702211FBCCA1A00835D8A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 55D7021E1FBCCA1A00835D8A /* Assets.xcassets */; };
 		55D702221FBCCA3600835D8A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 55D7021E1FBCCA1A00835D8A /* Assets.xcassets */; };
 		55D7022C1FBCCADC00835D8A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 55D7021A1FBCCA1A00835D8A /* LaunchScreen.storyboard */; };
 		5E437A442489724E009DBF9A /* CustomBulletins.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E437A3D2489724E009DBF9A /* CustomBulletins.framework */; };
@@ -199,7 +197,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastSwiftUpdateCheck = 0910;
-				LastUpgradeCheck = 2640;
+				LastUpgradeCheck = 2710;
 				ORGANIZATIONNAME = "Alexis Aubry";
 				TargetAttributes = {
 					558A12401F7D7865005EC97C = {
@@ -435,7 +433,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = "$(SRCROOT)/Configs/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = "$(RECOMMENDED_IPHONEOS_DEPLOYMENT_TARGET)";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -457,7 +455,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = "$(SRCROOT)/Configs/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = "$(RECOMMENDED_IPHONEOS_DEPLOYMENT_TARGET)";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -479,7 +477,8 @@
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
+				/* Export the Swift module without a Clang module. */
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -487,7 +486,7 @@
 				ENABLE_MODULE_VERIFIER = NO;
 				INFOPLIST_FILE = CustomBulletins/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = "$(RECOMMENDED_IPHONEOS_DEPLOYMENT_TARGET)";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -501,6 +500,8 @@
 				SKIP_INSTALL = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				/* The demo has Swift clients only. */
+				SWIFT_INSTALL_OBJC_HEADER = NO;
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -516,7 +517,8 @@
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
+				/* Export the Swift module without a Clang module. */
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -524,7 +526,7 @@
 				ENABLE_MODULE_VERIFIER = NO;
 				INFOPLIST_FILE = CustomBulletins/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = "$(RECOMMENDED_IPHONEOS_DEPLOYMENT_TARGET)";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -537,6 +539,8 @@
 				SKIP_INSTALL = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				/* The demo has Swift clients only. */
+				SWIFT_INSTALL_OBJC_HEADER = NO;
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
