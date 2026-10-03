@@ -9,13 +9,14 @@
 [#1](https://github.com/LambdaDigamma/BulletinBoard/pull/1)
 
 ### Fixes
+- Use UIKit’s navigation-bar Close item with its standard appearance, accessibility, and interaction. Match the actual card surface and keep native scrolling content below the close header.
 - Keep bulletins clear of an active iPhone Duo fold, fit narrow and short regions, and scroll long content and keyboard forms. Adapt the demo controls and galleries to live width changes.
 [#1](https://github.com/LambdaDigamma/BulletinBoard/pull/1)
 - Preserve displayed controls during loading and clean up each active item once after dismissal. Ignore stale page-transition callbacks after dismissal.
 [#1](https://github.com/LambdaDigamma/BulletinBoard/pull/1)
 
 ### Changed Behavior
-- Require Xcode 27.1 or later to build the Duo APIs. Keep the iOS 15 deployment target. Use a default card corner radius of 12 independently of safe-area insets.
+- Require Xcode 27.1 or later to build the Duo APIs. Require iOS 17 or later. Use a default card corner radius of 12 independently of safe-area insets.
 [#1](https://github.com/LambdaDigamma/BulletinBoard/pull/1)
 
 ## 🔖 v6.1.1

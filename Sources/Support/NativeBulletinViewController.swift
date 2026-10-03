@@ -20,6 +20,8 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
     private(set) var measuredContentHeight: CGFloat = 0
     private var contentWidthConstraint: NSLayoutConstraint!
     private var stackTopConstraint: NSLayoutConstraint!
+    private var scrollTopConstraint: NSLayoutConstraint!
+    private var reservesCloseButton = false
     private var isDisplayingActivityIndicator = false
     private var isUpdatingDetents = false
     private var lastMeasurementWidth: CGFloat = 0
@@ -85,10 +87,11 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
         ])
 
         contentContainer.addSubview(contentScrollView)
+        scrollTopConstraint = contentScrollView.topAnchor.constraint(equalTo: contentContainer.topAnchor)
         NSLayoutConstraint.activate([
             contentScrollView.leadingAnchor.constraint(equalTo: contentContainer.safeAreaLayoutGuide.leadingAnchor),
             contentScrollView.trailingAnchor.constraint(equalTo: contentContainer.safeAreaLayoutGuide.trailingAnchor),
-            contentScrollView.topAnchor.constraint(equalTo: contentContainer.topAnchor),
+            scrollTopConstraint,
             contentScrollView.bottomAnchor.constraint(equalTo: contentContainer.bottomAnchor),
         ])
         contentWidthConstraint = contentScrollView.contentLayoutGuide.widthAnchor.constraint(equalTo: contentScrollView.frameLayoutGuide.widthAnchor)
@@ -113,9 +116,9 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
 
         contentContainer.addSubview(closeButton)
         NSLayoutConstraint.activate([
-            closeButton.topAnchor.constraint(equalTo: contentContainer.safeAreaLayoutGuide.topAnchor, constant: 8),
-            closeButton.trailingAnchor.constraint(equalTo: contentContainer.safeAreaLayoutGuide.trailingAnchor, constant: -8),
-            closeButton.widthAnchor.constraint(equalToConstant: 44),
+            closeButton.topAnchor.constraint(equalTo: contentContainer.safeAreaLayoutGuide.topAnchor, constant: 16),
+            closeButton.leadingAnchor.constraint(equalTo: contentContainer.safeAreaLayoutGuide.leadingAnchor),
+            closeButton.trailingAnchor.constraint(equalTo: contentContainer.safeAreaLayoutGuide.trailingAnchor),
             closeButton.heightAnchor.constraint(equalToConstant: 44),
         ])
         closeButton.addTarget(self, action: #selector(closeButtonTapped), for: .touchUpInside)
@@ -131,6 +134,7 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+        updateHeaderHeight()
         updateContentHeight()
     }
 
@@ -177,7 +181,7 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
             withHorizontalFittingPriority: .required,
             verticalFittingPriority: .fittingSizeLevel
         ).height
-        let height = max(1, stackHeight + stackTopConstraint.constant + 24)
+        let height = max(1, stackHeight + scrollTopConstraint.constant + stackTopConstraint.constant + 24)
         let scale = max(1, traitCollection.displayScale)
         return ceil(height * scale) / scale
     }
@@ -227,14 +231,22 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
     func updateCloseButton(isRequired: Bool) {
         closeButton.alpha = isRequired && !isDisplayingActivityIndicator ? 1 : 0
         closeButton.isUserInteractionEnabled = isRequired && !isDisplayingActivityIndicator
+        closeButton.accessibilityElementsHidden = !closeButton.isUserInteractionEnabled
         if isViewLoaded {
-            stackTopConstraint.constant = isRequired ? 60 : 32
+            reservesCloseButton = isRequired
+            stackTopConstraint.constant = isRequired ? 0 : 32
+            updateHeaderHeight()
             view.setNeedsLayout()
         }
     }
 
+    private func updateHeaderHeight() {
+        // Keep scrolling content below the full touch target, including asymmetric safe areas.
+        scrollTopConstraint.constant = reservesCloseButton ? contentContainer.safeAreaInsets.top + 68 : 0
+    }
+
     private func updateCloseButtonColors() {
-        closeButton.updateColors(isDarkBackground: traitCollection.userInterfaceStyle == .dark)
+        closeButton.updateColors(for: .systemBackground)
     }
 
     func cancelInteractionIfNeeded() {

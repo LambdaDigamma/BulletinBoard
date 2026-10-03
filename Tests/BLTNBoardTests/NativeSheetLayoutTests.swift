@@ -5,6 +5,42 @@ import XCTest
 @MainActor
 final class NativeSheetLayoutTests: XCTestCase {
 
+    func testCloseButtonKeepsAReachableHeaderAboveScrollingContentInBothDirections() throws {
+        guard #available(iOS 26.0, *) else { throw XCTSkip("Native sheets require iOS 26") }
+        let text = UILabel()
+        text.numberOfLines = 0
+        text.text = String(repeating: "Long content must not scroll under Close. ", count: 40)
+        let fixture = makeFixture(size: CGSize(width: 360, height: 320), content: [text])
+        defer { removeFixture(fixture) }
+        let controller = fixture.controller
+        controller.updateCloseButton(isRequired: true)
+        controller.additionalSafeAreaInsets = UIEdgeInsets(top: 12, left: 20, bottom: 0, right: 8)
+        for direction in [UITraitEnvironmentLayoutDirection.leftToRight, .rightToLeft] {
+            controller.traitOverrides.layoutDirection = direction
+            layout(fixture)
+            let frame = controller.closeButton.convert(controller.closeButton.bounds, to: controller.view)
+            let safeFrame = controller.view.bounds.inset(by: controller.view.safeAreaInsets)
+            XCTAssertEqual(frame.height, 44)
+            XCTAssertEqual(frame.minY - safeFrame.minY, 16, accuracy: 0.5)
+            if direction == .leftToRight {
+                XCTAssertEqual(safeFrame.maxX, frame.maxX, accuracy: 0.5)
+            } else {
+                XCTAssertEqual(frame.minX, safeFrame.minX, accuracy: 0.5)
+            }
+            let scroll = controller.contentScrollView
+            XCTAssertGreaterThanOrEqual(scroll.frame.minY, frame.maxY + 8)
+            scroll.setContentOffset(CGPoint(x: 0, y: scroll.contentSize.height - scroll.bounds.height), animated: false)
+            let x = direction == .leftToRight ? frame.maxX - 38 : frame.minX + 38
+            let hit = controller.view.hitTest(CGPoint(x: x, y: frame.midY), with: nil)
+            XCTAssertTrue(hit?.isDescendant(of: controller.closeButton) == true)
+        }
+        controller.updateCloseButton(isRequired: false)
+        layout(fixture)
+        XCTAssertFalse(controller.closeButton.isUserInteractionEnabled)
+        XCTAssertTrue(controller.closeButton.accessibilityElementsHidden)
+        XCTAssertEqual(controller.contentScrollView.frame.minY, 0, accuracy: 0.5)
+    }
+
     @available(iOS 26.0, *)
     private typealias Fixture = (window: UIWindow, parent: UIViewController,
                                 controller: NativeBulletinViewController, manager: BLTNItemManager)

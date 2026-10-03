@@ -2,11 +2,11 @@
 
 BulletinBoard uses the presented view's bounds, traits, safe area, and keyboard layout guide. It does not use a global screen size or device orientation to place the card. The default presenter is the custom card. Native UIKit sheets are an optional presenter on iOS 26 and later.
 
-Build with Xcode 27.1 or later. The library still runs on iOS 15 and later. Hinge and reserved-region calls run only on iOS 27.1 and later.
+Build with Xcode 27.1 or later. The library still runs on iOS 17 and later. Hinge and reserved-region calls run only on iOS 27.1 and later.
 
 ## Native sheets
 
-Set `manager.presentationStyle = .nativeSheet` before showing a bulletin. A request on iOS 15 through iOS 25 uses the custom presenter. Both presenters use the same item views, buttons, item stack, and callbacks.
+Set `manager.presentationStyle = .nativeSheet` before showing a bulletin. A request on iOS 17 through iOS 25 uses the custom presenter. Both presenters use the same item views, buttons, item stack, and callbacks.
 
 ```mermaid
 flowchart TD
@@ -51,6 +51,16 @@ The division frames already include system interaction margins. BulletinBoard do
 Regular-width cards prefer 444 points and shrink when the clear region is narrower. Compact-width cards fill the region with `edgeSpacing`. Card height is limited to the region. The inner scroll view keeps long content and actions reachable without reducing the content's natural height.
 
 ## Keyboard and options
+
+Both presenters use UIKit's navigation-bar Close item in a transparent header. UIKit supplies the symbol, accessibility label, pressed state, and current system appearance. The header follows the actual card surface, including a custom light card in a dark app. Empty header space passes touches through. In native mode, the scroll viewport starts below the close header, so long content cannot cover the control. Hiding Close removes the native header space.
+
+```mermaid
+flowchart LR
+    Tap[System navigation-bar Close item] --> Header[Shared close header]
+    Header --> Presenter[Current presenter]
+    Presenter --> Manager[Dismiss through BLTNItemManager]
+    Manager --> Callback[Item dismissal callback and cleanup]
+```
 
 `shouldRespondToKeyboardChanges` is read from the current item on each layout. The keyboard guide uses the presented view's coordinates, including keyboard movement and undocked keyboards. It stays connected while the keyboard is hidden, so the first appearance triggers a layout update. A field that has focus is brought into view when the available region changes. A person can still scroll the other content.
 

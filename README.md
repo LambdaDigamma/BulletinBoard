@@ -16,7 +16,7 @@ Here are some screenshots showing what you can build with BulletinBoard:
 ## Requirements
 
 - Xcode 27.1 and later (the iOS 27.1 SDK supplies the iPhone Duo layout APIs)
-- iOS 15 and later
+- iOS 17 and later
 - Swift 6 language mode with SwiftPM PackageDescription 6.2 or later.
 
 ## Demo

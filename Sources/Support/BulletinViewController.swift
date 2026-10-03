@@ -160,10 +160,10 @@ extension BulletinViewController {
 
         contentView.addSubview(closeButton)
         closeButton.translatesAutoresizingMaskIntoConstraints = false
-        closeButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12).isActive = true
-        closeButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12).isActive = true
+        closeButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16).isActive = true
+        closeButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor).isActive = true
+        closeButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor).isActive = true
         closeButton.heightAnchor.constraint(equalToConstant: 44).isActive = true
-        closeButton.widthAnchor.constraint(equalToConstant: 44).isActive = true
         closeButton.isUserInteractionEnabled = true
 
         closeButton.addTarget(self, action: #selector(closeButtonTapped), for: .touchUpInside)
@@ -263,7 +263,7 @@ extension BulletinViewController {
 
         contentView.backgroundColor = manager.backgroundColor
         contentView.cornerRadius = CGFloat((manager.cardCornerRadius ?? 12).doubleValue)
-        closeButton.updateColors(isDarkBackground: manager.backgroundColor.needsDarkText == false)
+        closeButton.updateColors(for: manager.backgroundColor)
 
         let cardPadding = manager.edgeSpacing.rawValue
 
@@ -646,10 +646,14 @@ extension BulletinViewController {
 
     func showCloseButton() {
         closeButton.alpha = 1
+        closeButton.isUserInteractionEnabled = true
+        closeButton.accessibilityElementsHidden = false
     }
 
     func hideCloseButton() {
         closeButton.alpha = 0
+        closeButton.isUserInteractionEnabled = false
+        closeButton.accessibilityElementsHidden = true
     }
 
     @objc func closeButtonTapped() {
