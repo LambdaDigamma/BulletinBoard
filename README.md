@@ -15,7 +15,7 @@ Here are some screenshots showing what you can build with BulletinBoard:
 
 ## Requirements
 
-- Xcode 27.1 and later (the iOS 27.1 SDK supplies the iPhone Duo layout APIs)
+- Xcode 27.1 and later
 - iOS 17 and later
 - Swift 6 language mode with SwiftPM PackageDescription 6.2 or later.
 
@@ -30,7 +30,7 @@ A demo project is included in the `BulletinBoard` workspace. It demonstrates how
 
 Build and run the `BB-Swift` scheme to open the demo app.
 
-Use the **Bulletins** menu to select **Custom Card** or **Native Sheet**, then open the introduction, name form, date picker, pet selector, photo gallery, or long Pet Care Guide. Native sheets require iOS 26 or later. Both image galleries update their cell sizes when the available width changes. UIKit previews cover both presenters, narrow cards, and short windows.
+Use the **Bulletins** menu to open the introduction, name form, date picker, pet selector, photo gallery, or long Pet Care Guide. All examples use native sheets on iOS 17 and later. Both image galleries update their cell sizes when the available width changes. UIKit previews cover narrow and short windows, dark mode, loading, and page transitions.
 
 ## Framework previews
 
@@ -40,19 +40,16 @@ The previews cover alerts, dismissal and reopening, a text field, loading, push/
 
 ## Resizing and iPhone Duo
 
-Custom cards adapt to the current view bounds and safe area. On iOS 27.1, a partially folded Duo places the whole custom card in one clear region beside the fold. Long content scrolls inside the card. Keyboard placement uses the local keyboard layout guide and the current item's keyboard policy.
-
-You can also use a native UIKit sheet on iOS 26 or later:
+BulletinBoard uses native UIKit sheets on every supported iOS release. Each sheet has one content-height stop. Long content scrolls, and UIKit handles keyboard movement. Page changes fade out the old content, animate the sheet height, and fade in the new content. Reduce Motion applies the new page without animation.
 
 ```swift
 let manager = BLTNItemManager(rootItem: item)
-manager.presentationStyle = .nativeSheet
 manager.showBulletin(above: self)
 ```
 
-The default remains `.custom`. A native-sheet request falls back to the custom card on older releases. Native mode uses one content-height stop, scrolling, and system keyboard behavior. On iOS 26.1 and later, its solid system background adapts to light and dark mode. On iOS 26.0, UIKit can retain its glass sheet surface. On iOS 27 or later, it requests trailing placement for the Book posture. Tall native sheets can span a horizontal fold.
+The content background adapts to light and dark mode. On iOS 26.1 and later, the sheet also replaces the system glass surface with a solid background. On iOS 27 and later, it requests trailing placement for the Book posture. Tall native sheets can span a horizontal fold; content and actions remain scrollable.
 
-See [Adaptive layout](guides/Adaptive%20Layout.md) for placement rules, customization, and validation.
+The custom presenter was removed. `presentationStyle`, `backgroundColor`, `backgroundViewStyle`, `edgeSpacing`, `cardCornerRadius`, and `shouldRespondToKeyboardChanges` remain as deprecated compatibility settings and have no effect. UIKit controls sheet appearance and placement. See [Adaptive layout](guides/Adaptive%20Layout.md) for behavior, migration details, and validation.
 
 ## Installation
 

@@ -1,98 +1,88 @@
 # Adaptive layout
 
-BulletinBoard uses the presented view's bounds, traits, safe area, and keyboard layout guide. It does not use a global screen size or device orientation to place the card. The default presenter is the custom card. Native UIKit sheets are an optional presenter on iOS 26 and later.
+BulletinBoard uses native UIKit sheets on iOS 17 and later. It measures item content from the current view bounds and safe area. UIKit controls placement, keyboard movement, and system gestures. There is no custom presenter or separate overlay window.
 
-Build with Xcode 27.1 or later. The library still runs on iOS 17 and later. Hinge and reserved-region calls run only on iOS 27.1 and later.
+## Content height and scrolling
 
-## Native sheets
-
-Set `manager.presentationStyle = .nativeSheet` before showing a bulletin. A request on iOS 17 through iOS 25 uses the custom presenter. Both presenters use the same item views, buttons, item stack, and callbacks.
+Each sheet has one content-height detent. It has no second full-height stop. Before presentation, the controller measures content from the presenter's local usable width. After presentation, it measures again at the sheet's actual width and caps the detent at UIKit's maximum height. Long content uses one scroll view. Width, safe-area, and Dynamic Type changes trigger a new measurement. UIKit can adjust the sheet for the keyboard.
 
 ```mermaid
 flowchart TD
-    Manager[BLTNItemManager: item views and callbacks] --> Choice{Presentation style}
-    Choice -->|custom or older iOS| Custom[Custom card presenter]
-    Choice -->|nativeSheet on iOS 26+| Native[Native sheet presenter]
-    Custom --> Regions[Choose a clear fold region]
-    Native --> UIKit[One content-height detent; UIKit keyboard and gestures]
-    UIKit --> Placement[iOS 27+: request trailing placement]
-    Regions --> Content[Shared content stack and scroll view]
-    Placement --> Surface[iOS 26.1+: solid light / dark system surface]
-    Surface --> Content
+    Manager[BLTNItemManager: item stack and callbacks] --> Sheet[Native sheet controller]
+    Bounds[Local width, safe area, and text size] --> Measure[Measure content stack and Close header]
+    Sheet --> Measure
+    Measure --> Detent[One detent capped at UIKit maximum height]
+    Detent --> UIKit[UIKit placement and keyboard movement]
+    UIKit --> Scroll[Scroll long content to every action]
 ```
 
-The native sheet has one content-height detent. A person cannot expand it to a separate full-height stop. Before presentation, it measures content from the presenter's local usable width. It then measures again at the sheet's actual width and limits the detent to UIKit's maximum height. Long content uses one scroll view. Width changes, safe-area changes, and Dynamic Type changes cause a new measurement. UIKit can still adjust the sheet for the keyboard. Loading retains the page height and blocks interactive dismissal.
+The scroll viewport starts below the fixed Close header. UIKit's navigation-bar Close item supplies the symbol, accessibility label, pressed state, and system appearance. The header follows the system background and layout direction. Empty header space passes touches through. Hiding Close removes its header space.
 
-On iOS 26.1 and later, native mode uses `UIColorEffect` with `.systemBackground` to replace the sheet's glass with a solid surface. Photos behind the sheet do not reduce text contrast. The surface adapts to light and dark mode. On iOS 26.0, the content has a system background, but UIKit can retain its glass sheet surface. UIKit controls the corner geometry. The grabber stays hidden, because a visible grabber can overlap a horizontal fold. System dismissal gestures remain available. Custom `backgroundColor`, `backgroundViewStyle`, `edgeSpacing`, and `cardCornerRadius` do not set the native sheet appearance. UIKit handles keyboard movement; the custom item's keyboard opt-out does not change native sheet behavior. Setting `allowsSwipeInteraction = false` blocks native interactive dismissal, including dismissal by an outside tap. Explicit action and close-button dismissal remain available when the item allows them.
+On iOS 26.1 and later, `UIColorEffect` replaces the sheet's glass with a solid `.systemBackground` surface. The content uses `.systemBackground` on every supported release. On iOS 26.0, UIKit can retain glass around that content. The grabber stays hidden because there is only one height stop.
 
-On iOS 27 and later, the native sheet requests `.trailing` placement. The default native placement stayed centered across the vertical Book fold in the iOS 27.1 simulator; trailing placement moved the short sheet to the clear side. A tall native sheet can span a horizontal fold. Its content must remain scrollable so a person can reach each action.
+## Page transitions and loading
 
-`showBulletin(in: windowScene)` presents a native sheet from the scene's application controller. It does not create a separate overlay window. Use `showBulletin(above:)` when the app needs a specific presenter.
-
-## Custom card placement
-
-The card stays in one clear region. A vertical division selects the trailing region, with support for right-to-left layout. A horizontal division selects the lower region. The selected region stays in use while it has enough space. If the keyboard leaves only a small strip in that region, the card can use another clear region.
+A page change preserves a snapshot before the old item releases its views. The snapshot fades out over 0.15 seconds. The new views stay hidden but remain measurable. The controller then invalidates the content detent inside `UISheetPresentationController.animateChanges` and fades the new content in over 0.25 seconds. UIKit owns the sheet resize curve and duration.
 
 ```mermaid
-flowchart TD
-    Change[Bounds, safe area, traits, or hinge change] --> Layout[Request view layout]
-    Keyboard[Local keyboard guide and item policy] --> Bounds[Usable bounds]
-    Layout --> Bounds
-    Layout --> Division[Active division frames in view coordinates]
-    Bounds --> Regions[Split bounds into clear regions]
-    Division --> Regions
-    Regions --> Select[Keep a usable region or select lower/trailing region]
-    Select --> Card[Constrain card width and height]
-    Card --> Content[Fit content or scroll inside the card]
+stateDiagram-v2
+    [*] --> Visible
+    Visible --> FadeOut: Push or pop; block input and dismissal
+    FadeOut --> Resize: Remove snapshot; measure new content
+    Resize --> FadeIn: Animate detent; call willDisplay
+    FadeIn --> Visible: Restore input; call onDisplay
+    FadeOut --> FadeOut: New page cancels old transition
+    FadeOut --> Loading: Loading cancels fade
+    FadeIn --> Loading: Loading cancels fade
+    Loading --> Visible: Hide loading; reuse current views
+    Visible --> Dismissed: Dismiss
+    FadeOut --> Dismissed: Cancel before teardown
+    FadeIn --> Dismissed: Cancel before teardown
 ```
 
-The division frames already include system interaction margins. BulletinBoard does not add those margins again. Hinge updates invalidate layout; each layout reads the current reserved regions. A region change cancels an active swipe before the card moves, so an old dismissal snapshot cannot cover the new region.
+`willDisplay()` runs before content fades in; `onDisplay()` runs after its fade completes. These callbacks do not indicate the end of UIKit's separate resize animation. Generation checks stop old callbacks after a new page or dismissal. Reduce Motion and disabled UIView animations apply the page and callbacks immediately.
 
-Regular-width cards prefer 444 points and shrink when the clear region is narrower. Compact-width cards fill the region with `edgeSpacing`. Card height is limited to the region. The inner scroll view keeps long content and actions reachable without reducing the content's natural height.
+Loading retains the current sheet height and blocks interactive dismissal. It cancels an active content fade, removes its snapshot, and shows the spinner at once. Hiding loading reuses the current views and values. It completes pending page callbacks once and does not repeat callbacks for a page that already finished display.
 
-## Keyboard and options
+## Migration and options
 
-Both presenters use UIKit's navigation-bar Close item in a transparent header. UIKit supplies the symbol, accessibility label, pressed state, and current system appearance. The header follows the actual card surface, including a custom light card in a dark app. Empty header space passes touches through. In native mode, the scroll viewport starts below the close header, so long content cannot cover the control. Hiding Close removes the native header space.
+The custom presenter has been removed. These properties remain for source compatibility, are deprecated, and have no effect:
 
-```mermaid
-flowchart LR
-    Tap[System navigation-bar Close item] --> Header[Shared close header]
-    Header --> Presenter[Current presenter]
-    Presenter --> Manager[Dismiss through BLTNItemManager]
-    Manager --> Callback[Item dismissal callback and cleanup]
-```
+| Setting | Current behavior |
+| --- | --- |
+| `presentationStyle` (including `.custom`) | Always uses a native sheet. |
+| `backgroundColor`, `backgroundViewStyle` | UIKit and the system background control the surface. |
+| `edgeSpacing`, `cardCornerRadius` | UIKit controls margins and corners. |
+| `BLTNItem.shouldRespondToKeyboardChanges` | UIKit controls keyboard movement. |
 
-`shouldRespondToKeyboardChanges` is read from the current item on each layout. The keyboard guide uses the presented view's coordinates, including keyboard movement and undocked keyboards. It stays connected while the keyboard is hidden, so the first appearance triggers a layout update. A field that has focus is brought into view when the available region changes. A person can still scroll the other content.
+The enum cases and raw values remain unchanged so existing switches still compile. Public `AnimationChain` and `AnimationPhase` utilities also remain available.
 
-`edgeSpacing` is measured from the usable region. Safe-area changes do not set the spacing to zero. The default `cardCornerRadius` is 12; an explicit value is preserved. `edgeSpacing = .none` gives the card square corners. `hidesHomeIndicator` lets the card surface extend to the bottom edge in compact width while the scroll view keeps content clear of the system inset.
+`allowsSwipeInteraction = false` blocks UIKit interactive dismissal, including outside taps. Explicit actions and Close can still dismiss an item that permits dismissal. Status-bar and home-indicator settings remain available, but their effect follows UIKit's page-sheet presentation rules. `withContentView` still exposes the content container; it has no custom rounded-card layer.
 
-On a compact card, a downward drag at the top of the content can dismiss a dismissable item. Other content drags scroll. The scroll view stays enabled as content changes. The swipe recognizer checks the current content size when a gesture starts. Nested galleries keep their own scroll gestures.
+`showBulletin(in: windowScene)` presents from an existing visible controller in that scene. Use `showBulletin(above:)` for a specific presenter.
 
-## Custom items and demo checks
+## iPhone Duo and demo checks
 
-Give custom content flexible horizontal constraints and a complete vertical layout. A collection view must invalidate width-dependent cell sizes when its bounds change. Avoid a fixed control width that exceeds a narrow card.
+On iOS 27 and later, the sheet requests trailing placement for the vertical Book fold. A tall native sheet can span a horizontal fold. The removed custom presenter selected one clear region; native sheets now use UIKit placement. A short viewport test proves scrolling and action reachability, but it does not simulate a physical fold.
 
-The demo's **Bulletins** menu selects **Custom Card** or **Native Sheet** and includes direct entry points for forms, a date picker, pet choices, photos, and long content. The custom background control is available for the custom presenter. Both galleries recalculate cells after width changes. The nine-photo grid uses a square frame and the outer scroll view, so every row and the actions share one scroll path. Isolated UIKit previews show both presenters in narrow and short layouts.
+Give custom item content flexible horizontal constraints and a complete vertical layout. Collections must invalidate width-dependent cell sizes when their bounds change. Both demo galleries recalculate cells after width changes. The nine-photo grid uses the outer scroll view so its rows and actions share one scroll path.
 
-Check these paths in the iPhone Duo simulator:
+Use the demo's **Bulletins** menu and the framework's **Page Size Transitions** preview:
 
-1. Select each presenter. Open a bulletin fully open, then partially fold it with a vertical division.
-2. Rotate to a horizontal division. Check that the whole custom card stays clear of the fold. For the native sheet, check that the content and final action remain reachable.
-3. Open **Enter Name**, show the keyboard, and fold or unfold without losing the field.
-4. Open **Pet Care Guide** and scroll to the final action.
-5. Open **Favorite Pets**, continue to the gallery, scroll to **Validate** and **Change**, and change the window width.
-6. Dismiss and reopen. Repeat with a compact iPhone and an older supported iOS runtime.
-7. With native mode selected, show loading, change the current item, and present an alert above the sheet. Check that loading blocks interactive dismissal and that closing the alert keeps the bulletin active.
-8. Check native text over a busy photo in light and dark mode. Drag the sheet upward and release; it must return to its content-height stop. Tall content must still scroll to the final action.
+1. Push a longer page, then return with Back. Check smooth growth, shrinkage, and content fading.
+2. Repeat with Reduce Motion enabled. The new page must appear directly.
+3. Open Enter Name, show the keyboard, and resize without losing the field value.
+4. Start loading, change the current page, and open an alert above the sheet. Loading must block interactive dismissal; closing the alert must retain the bulletin.
+5. Scroll Pet Care Guide and Pet Photos to their final actions. Resize each gallery.
+6. Check light and dark mode over a busy background. Check Close in right-to-left layout.
+7. On a working Duo runtime, check the vertical Book fold and horizontal partial fold. Scroll through tall content and reach every action.
+8. Dismiss and reopen. Repeat on an older supported runtime.
 
-Focused regression tests are described in [Testing](../Tests/TESTING.md).
+See [Framework previews](Framework%20Previews.md) and [Testing](../Tests/TESTING.md).
 
 ## Apple references
 
-- [UIView reserved regions](https://developer.apple.com/documentation/uikit/uiview/reservedregions(kind:options:))
-- [UIHingeInteraction](https://developer.apple.com/documentation/uikit/uihingeinteraction)
-- [Strike a pose with adaptive layouts on iPhone Duo](https://developer.apple.com/videos/play/tech-talks/111463/)
-- [Design for iPhone Duo](https://developer.apple.com/videos/play/tech-talks/111466/)
-- [Build a UIKit app with the new design](https://developer.apple.com/videos/play/wwdc2025/284/)
 - [UISheetPresentationController](https://developer.apple.com/documentation/uikit/uisheetpresentationcontroller)
+- [Animate custom detent changes](https://developer.apple.com/documentation/uikit/uisheetpresentationcontroller/invalidatedetents())
 - [Native sheet placement](https://developer.apple.com/documentation/uikit/uisheetpresentationcontroller/preferredplacement)
+- [Design for iPhone Duo](https://developer.apple.com/videos/play/tech-talks/111466/)

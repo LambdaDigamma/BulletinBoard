@@ -15,7 +15,6 @@ import CustomBulletins
 
 class ViewController: UIViewController {
 
-    @IBOutlet weak var styleButtonItem: UIBarButtonItem!
     @IBOutlet weak var segmentedControl: UISegmentedControl!
     @IBOutlet weak var showIntoButtonItem: UIBarButtonItem!
     @IBOutlet weak var collectionView: UICollectionView!
@@ -27,15 +26,6 @@ class ViewController: UIViewController {
     private var shouldHideStatusBar: Bool = false
 
     private var didCheckInitialBulletin = false
-    private var presentationStyle: BLTNPresentationStyle = .custom
-
-    // MARK: - Customization
-
-    /// The available background styles.
-    let backgroundStyles = BackgroundStyles()
-
-    /// The current background style.
-    var currentBackground = (name: "Dimmed", style: BLTNBackgroundViewStyle.dimmed)
 
     // MARK: - Bulletin Manager
 
@@ -61,7 +51,6 @@ class ViewController: UIViewController {
         segmentedControl.selectedSegmentIndex = favoriteTab
         dataSource = favoriteTab == 0 ? .cat : .dog
 
-        updateBackgroundControl()
         configureBulletinMenu()
 
         // Set up the collection view
@@ -146,57 +135,20 @@ class ViewController: UIViewController {
 
         bulletinManager = makeBulletinManager(rootItem: item)
 
-//        Uncomment to customize interface
-//        bulletinManager.cardCornerRadius = 22
-//        bulletinManager.edgeSpacing = .none
-//        bulletinManager.allowsSwipeInteraction = false
-//        bulletinManager.hidesHomeIndicator = true
-//        bulletinManager.backgroundColor = .blue
-
-        bulletinManager.backgroundViewStyle = currentBackground.style
         bulletinManager.statusBarAppearance = shouldHideStatusBar ? .hidden : .automatic
         bulletinManager.showBulletin(above: self)
 
     }
 
     private func makeBulletinManager(rootItem: BLTNItem) -> BLTNItemManager {
-        let manager = BLTNItemManager(rootItem: rootItem)
-        manager.presentationStyle = presentationStyle
-        return manager
-    }
-
-    private func selectPresentationStyle(_ style: BLTNPresentationStyle) {
-        presentationStyle = style
-        updateBackgroundControl()
-        configureBulletinMenu()
-        reloadManager()
-    }
-
-    private func updateBackgroundControl() {
-        let usesCustomCard = presentationStyle == .custom
-        styleButtonItem.title = usesCustomCard ? currentBackground.name : "System"
-        styleButtonItem.isEnabled = usesCustomCard
-        styleButtonItem.accessibilityLabel = usesCustomCard ? "Custom Card Background" : "System Sheet Appearance"
+        BLTNItemManager(rootItem: rootItem)
     }
 
     private func configureBulletinMenu() {
-        let customAction = UIAction(title: "Custom Card", state: presentationStyle == .custom ? .on : .off) { [weak self] _ in
-            self?.selectPresentationStyle(.custom)
-        }
-        let nativeAction: UIAction
-        if #available(iOS 26, *) {
-            nativeAction = UIAction(title: "Native Sheet", state: presentationStyle == .nativeSheet ? .on : .off) { [weak self] _ in
-                self?.selectPresentationStyle(.nativeSheet)
-            }
-        } else {
-            nativeAction = UIAction(title: "Native Sheet (iOS 26+)", attributes: .disabled) { _ in }
-        }
-
         showIntoButtonItem.title = "Bulletins"
         showIntoButtonItem.target = nil
         showIntoButtonItem.action = nil
         showIntoButtonItem.menu = UIMenu(children: [
-            UIMenu(title: "Presentation", options: .displayInline, children: [customAction, nativeAction]),
             UIMenu(title: "Examples", options: .displayInline, children: [
                 UIAction(title: "Introduction") { [weak self] _ in
                     self?.showBulletin()
@@ -226,35 +178,6 @@ class ViewController: UIViewController {
     }
 
     // MARK: - Actions
-
-    @IBAction func styleButtonTapped(_ sender: Any) {
-        guard presentationStyle == .custom else { return }
-
-        let styleSelectorSheet = UIAlertController(title: "Bulletin Background Style",
-                                                   message: nil,
-                                                   preferredStyle: .actionSheet)
-
-        for backgroundStyle in backgroundStyles {
-
-            let action = UIAlertAction(title: backgroundStyle.name, style: .default) { _ in
-                self.currentBackground = backgroundStyle
-                self.updateBackgroundControl()
-            }
-
-            let isSelected = backgroundStyle.name == currentBackground.name
-            action.setValue(isSelected, forKey: "checked")
-
-            styleSelectorSheet.addAction(action)
-
-        }
-
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-        styleSelectorSheet.addAction(cancelAction)
-
-        styleSelectorSheet.popoverPresentationController?.barButtonItem = styleButtonItem
-        present(styleSelectorSheet, animated: true)
-
-    }
 
     @IBAction func showIntroButtonTapped(_ sender: UIBarButtonItem) {
         showBulletin()

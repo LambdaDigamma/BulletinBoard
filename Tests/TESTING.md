@@ -16,17 +16,7 @@ Before the fix, the animation phase test aborts on iOS 18.6 in `TaskLocal::StopL
 
 ## Focused layout checks
 
-```sh
-Scripts/test-ios.sh -destination 'platform=iOS Simulator,name=iPhone 17e,OS=27.2' \
-    -parallel-testing-enabled NO \
-    -only-testing:BLTNBoardTests/BulletinLayoutRegionTests \
-    -only-testing:BLTNBoardTests/BulletinViewControllerLayoutTests \
-    -only-testing:BLTNBoardTests/BulletinSwipeScrollingTests
-```
-
-The region tests cover vertical and horizontal divisions, right-to-left layout, asymmetric bounds, stable region selection, and keyboard-reduced space. The UIKit tests use real windows and child trait overrides. They check narrow and short containers, long-content scrolling and expansion, safe-area changes, corner options, hidden-indicator content clearance, hidden-keyboard layout policy, and loaded-controller release. Swipe tests check that content drags scroll and that downward dismissal starts only at the top of a compact dismissable card.
-
-Repeat the affected UIKit and lifetime tests on an older supported iOS runtime to check availability guards. Use the [Duo demo checks](../guides/Adaptive%20Layout.md) to verify live fold, keyboard, and nested gallery interactions. The Swift package test target does not build the demo targets, so gallery resizing is checked in the demo app.
+Use `-only-testing:BLTNBoardTests/NativeSheetLayoutTests` with either script to check width changes, asymmetric safe areas, Dynamic Type, the fixed Close header, long-content scrolling, final-action hit testing, and controller release. Repeat affected tests on an older installed runtime. Use the [Duo demo checks](../guides/Adaptive%20Layout.md) for real fold, keyboard, and gallery interactions. Package tests do not build the demo targets.
 
 ## Framework preview fixture check
 
@@ -40,18 +30,18 @@ Run `Scripts/test-ios-hosted.sh` with `SWIFT_ACTIVE_COMPILATION_CONDITIONS=DEBUG
 
 ```sh
 Scripts/test-ios-hosted.sh -destination 'platform=iOS Simulator,name=iPhone 18 Pro,OS=27.2' \
-    -parallel-testing-enabled NO \
+    SWIFT_ACTIVE_COMPILATION_CONDITIONS=DEBUG -parallel-testing-enabled NO \
     -only-testing:BLTNBoardTests/NativeSheetManagerTests \
     -only-testing:BLTNBoardTests/NativeSheetLayoutTests \
-    -only-testing:BLTNBoardTests/BulletinViewControllerLayoutTests \
-    -only-testing:BLTNBoardTests/BulletinSwipeScrollingTests \
+    -only-testing:BLTNBoardTests/BulletinCloseButtonTests \
+    -only-testing:BLTNBoardTests/FrameworkPreviewTests \
     -only-testing:BLTNBoardTests/DeinitializationTests
 ```
 
-Native manager tests check loading locks, startup spinner contrast across appearance changes, explicit spinner colors, unchanged field instances and values, push/pop callbacks and height changes, explicit and native dismissal cleanup, duplicate delegate callbacks, a visible viewport after reopening long content, scene presentation, overlay presentation, and callback re-entry. Layout tests check width changes, asymmetric safe areas, Dynamic Type, scrolling to a tappable final action, and controller release.
+Native manager tests check loading locks, startup spinner contrast across appearance changes, explicit spinner colors, unchanged field instances and values, push/pop callbacks and height changes, explicit and native dismissal cleanup, duplicate delegate callbacks, a visible viewport after reopening long content, scene presentation, overlay presentation, and callback re-entry. Transition tests also sample the presented layer during growth and shrinkage to confirm intermediate heights and content opacity. They check rapid push cancellation, loading during both fade phases, dismissal during a fade, callback re-entry, and the immediate path when UIView animations are disabled. Layout tests check width changes, asymmetric safe areas, Dynamic Type, scrolling to a tappable final action, and controller release.
 
 The hosted script generates a small scene-based app and test project under the ignored `.build/HostedTests` directory. It links the local Swift package and uses the same test sources. A standalone SwiftPM test process has no connected application scene, so it cannot verify a system sheet presentation. The hosted app provides that scene; the original script remains useful for layout, geometry, and lifetime tests.
 
-Repeat the presenter-selection, shared layout, swipe, and lifetime tests on an older runtime. A `.nativeSheet` request must use the custom presenter before iOS 26. Tests that need the native presenter explicitly skip on older releases.
+Repeat these focused tests on an older runtime. Every supported release uses the native presenter; there is no custom fallback.
 
-Use the demo mode selector for live Duo checks. Test the Book posture, a horizontal fold, the software keyboard, long content, and the photo gallery. Native trailing placement requires iOS 27; a tall native sheet can span the horizontal fold. The scroll test proves action reachability in a short viewport, while simulator interaction checks the actual system sheet placement.
+Use the framework Page Size Transitions preview and demo for visual checks. Sampled intermediate heights prove runtime sheet movement; they do not prove visual quality, Reduce Motion settings, software-keyboard behavior, or fold placement. Check these separately. Native trailing placement requires iOS 27; a tall native sheet can span a horizontal fold.

@@ -1,7 +1,6 @@
 import UIKit
 
-/// A system sheet that displays the same item content as the custom card.
-@available(iOS 26.0, *)
+/// A system sheet with a single content-height detent.
 final class NativeBulletinViewController: UIViewController, BulletinPresentationHost, UISheetPresentationControllerDelegate {
 
     weak var manager: BLTNItemManager?
@@ -25,6 +24,12 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
     private var isDisplayingActivityIndicator = false
     private var isUpdatingDetents = false
     private var lastMeasurementWidth: CGFloat = 0
+    private(set) var isTransitioningItem = false
+    private var defersContentHeight = false
+    private var transitionGeneration = 0
+    private var animatesItemTransition = false
+    private var contentAnimator: UIViewPropertyAnimator?
+    private var outgoingSnapshot: UIView?
 
     private static let contentDetentIdentifier = UISheetPresentationController.Detent.Identifier("bulletinContent")
 
@@ -155,8 +160,8 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
         setMeasuredContentHeight(contentHeight(for: width))
     }
 
-    private func updateContentHeight() {
-        guard !isUpdatingDetents else { return }
+    private func updateContentHeight(animated: Bool = false) {
+        guard !isUpdatingDetents, !defersContentHeight else { return }
         let insets = contentScrollView.adjustedContentInset
         let horizontalInsets = insets.left + insets.right
         if contentWidthConstraint.constant != -horizontalInsets {
@@ -172,7 +177,7 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
         let widthChanged = abs(lastMeasurementWidth - width) > 0.5
         lastMeasurementWidth = width
         guard widthChanged || abs(measuredContentHeight - height) > 0.5 else { return }
-        setMeasuredContentHeight(height)
+        setMeasuredContentHeight(height, animated: animated)
     }
 
     private func contentHeight(for width: CGFloat) -> CGFloat {
@@ -186,12 +191,115 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
         return ceil(height * scale) / scale
     }
 
-    private func setMeasuredContentHeight(_ height: CGFloat) {
-        measuredContentHeight = height
+    private func setMeasuredContentHeight(_ height: CGFloat, animated: Bool = false) {
         isUpdatingDetents = true
-        preferredContentSize = CGSize(width: preferredContentSize.width, height: height)
-        sheetPresentationController?.invalidateDetents()
+        let update = {
+            self.measuredContentHeight = height
+            self.preferredContentSize = CGSize(width: self.preferredContentSize.width, height: height)
+            self.sheetPresentationController?.invalidateDetents()
+        }
+        if animated, let sheet = sheetPresentationController {
+            sheet.animateChanges(update)
+        } else {
+            update()
+        }
         isUpdatingDetents = false
+    }
+
+    /// Preserve the visible page before its item releases its views.
+    func beginItemTransition(animated: Bool) {
+        cancelItemTransition()
+        defersContentHeight = true
+        view.layoutIfNeeded()
+        animatesItemTransition = animated && UIView.areAnimationsEnabled
+            && !UIAccessibility.isReduceMotionEnabled && presentingViewController != nil
+        if animatesItemTransition {
+            outgoingSnapshot = contentContainer.snapshotView(afterScreenUpdates: false)
+            if let snapshot = outgoingSnapshot {
+                snapshot.frame = contentContainer.frame
+                snapshot.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+                snapshot.isUserInteractionEnabled = false
+                snapshot.accessibilityElementsHidden = true
+                view.addSubview(snapshot)
+            }
+        }
+        isTransitioningItem = true
+        updateContentVisibility()
+        refreshInteraction()
+    }
+
+    /// Fade the old page out, resize with UIKit, then reveal the new page.
+    /// UIKit owns the resize duration. Display callbacks follow the content fade.
+    func finishItemTransition(willDisplay: @escaping () -> Bool, completion: @escaping () -> Void) {
+        let generation = transitionGeneration
+        let reveal: () -> Void = { [weak self] in
+            guard let self, self.transitionGeneration == generation else { return }
+            self.contentAnimator = nil
+            self.outgoingSnapshot?.removeFromSuperview()
+            self.outgoingSnapshot = nil
+            // Layout at the final width while detent updates are still suspended.
+            self.view.layoutIfNeeded()
+            self.defersContentHeight = false
+            self.updateContentHeight(animated: self.animatesItemTransition)
+            guard willDisplay(), self.transitionGeneration == generation else { return }
+
+            let finish: () -> Void = { [weak self] in
+                guard let self, self.transitionGeneration == generation else { return }
+                self.contentAnimator = nil
+                self.isTransitioningItem = false
+                self.updateContentVisibility()
+                self.refreshInteraction()
+                completion()
+            }
+            if self.animatesItemTransition {
+                let animator = UIViewPropertyAnimator(duration: 0.25, curve: .easeInOut) { [weak self] in
+                    self?.updateContentVisibility(revealing: true)
+                }
+                self.contentAnimator = animator
+                animator.addCompletion { position in
+                    if position == .end { finish() }
+                }
+                animator.startAnimation()
+            } else {
+                finish()
+            }
+        }
+        if animatesItemTransition, let snapshot = outgoingSnapshot {
+            let animator = UIViewPropertyAnimator(duration: 0.15, curve: .easeOut) {
+                snapshot.alpha = 0
+            }
+            contentAnimator = animator
+            animator.addCompletion { position in
+                if position == .end { reveal() }
+            }
+            animator.startAnimation()
+        } else {
+            reveal()
+        }
+    }
+
+    func cancelItemTransition() {
+        transitionGeneration += 1
+        contentAnimator?.stopAnimation(true)
+        contentAnimator = nil
+        outgoingSnapshot?.removeFromSuperview()
+        outgoingSnapshot = nil
+        isTransitioningItem = false
+        defersContentHeight = false
+        animatesItemTransition = false
+        if isViewLoaded { updateContentVisibility() }
+        refreshInteraction()
+    }
+
+    private func updateContentVisibility(revealing: Bool = false) {
+        let visible = !isTransitioningItem || revealing
+        contentStackView.alpha = visible && !isDisplayingActivityIndicator ? 1 : 0
+        activityIndicator.alpha = visible && isDisplayingActivityIndicator ? 1 : 0
+        closeButton.alpha = visible && reservesCloseButton && !isDisplayingActivityIndicator ? 1 : 0
+        contentContainer.isUserInteractionEnabled = !isTransitioningItem && !isDisplayingActivityIndicator
+        contentStackView.accessibilityElementsHidden = isTransitioningItem || isDisplayingActivityIndicator
+        closeButton.isUserInteractionEnabled = !isTransitioningItem && reservesCloseButton && !isDisplayingActivityIndicator
+        closeButton.accessibilityElementsHidden = !closeButton.isUserInteractionEnabled
     }
 
     func refreshLayout(resetScrollPosition: Bool = false) {
@@ -204,15 +312,17 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
     }
 
     func displayActivityIndicator(color: UIColor) {
-        // Capture the page height before its interface is hidden.
-        if isViewLoaded { view.layoutIfNeeded() }
+        // An interrupted page has not changed the visible sheet height yet.
+        // Keep that height, remove its snapshot, and show loading immediately.
+        if isTransitioningItem {
+            cancelItemTransition()
+        } else if isViewLoaded {
+            view.layoutIfNeeded()
+        }
         isDisplayingActivityIndicator = true
         activityIndicator.color = color
         activityIndicator.startAnimating()
-        activityIndicator.alpha = 1
-        contentStackView.alpha = 0
-        contentStackView.accessibilityElementsHidden = true
-        closeButton.alpha = 0
+        updateContentVisibility()
         refreshInteraction()
         UIAccessibility.post(notification: .screenChanged, argument: activityIndicator)
     }
@@ -220,20 +330,16 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
     func hideActivityIndicator() {
         isDisplayingActivityIndicator = false
         activityIndicator.stopAnimating()
-        activityIndicator.alpha = 0
-        contentStackView.alpha = 1
-        contentStackView.accessibilityElementsHidden = false
         updateCloseButton(isRequired: manager?.needsCloseButton == true)
+        updateContentVisibility()
         refreshInteraction()
         refreshLayout()
     }
 
     func updateCloseButton(isRequired: Bool) {
-        closeButton.alpha = isRequired && !isDisplayingActivityIndicator ? 1 : 0
-        closeButton.isUserInteractionEnabled = isRequired && !isDisplayingActivityIndicator
-        closeButton.accessibilityElementsHidden = !closeButton.isUserInteractionEnabled
+        reservesCloseButton = isRequired
+        updateContentVisibility()
         if isViewLoaded {
-            reservesCloseButton = isRequired
             stackTopConstraint.constant = isRequired ? 0 : 32
             updateHeaderHeight()
             view.setNeedsLayout()
@@ -255,16 +361,17 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
 
     func refreshInteraction() {
         // Native sheet swipe and outside-tap dismissal share one system policy.
-        isModalInPresentation = !isDismissable || isDisplayingActivityIndicator || manager?.allowsSwipeInteraction != true
+        isModalInPresentation = !isDismissable || isTransitioningItem || isDisplayingActivityIndicator || manager?.allowsSwipeInteraction != true
     }
 
     func cleanUpPresentation() {
+        cancelItemTransition()
         sheetPresentationController?.delegate = nil
         manager = nil
     }
 
     func presentationControllerShouldDismiss(_ presentationController: UIPresentationController) -> Bool {
-        isDismissable && !isDisplayingActivityIndicator && manager?.allowsSwipeInteraction == true
+        isDismissable && !isTransitioningItem && !isDisplayingActivityIndicator && manager?.allowsSwipeInteraction == true
     }
 
     func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
@@ -272,13 +379,13 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
     }
 
     override func accessibilityPerformEscape() -> Bool {
-        guard isDismissable && !isDisplayingActivityIndicator else { return false }
+        guard isDismissable && !isTransitioningItem && !isDisplayingActivityIndicator else { return false }
         manager?.dismissBulletin(animated: true)
         return true
     }
 
     @objc private func closeButtonTapped() {
-        guard isDismissable && !isDisplayingActivityIndicator else { return }
+        guard isDismissable && !isTransitioningItem && !isDisplayingActivityIndicator else { return }
         manager?.dismissBulletin(animated: true)
     }
 

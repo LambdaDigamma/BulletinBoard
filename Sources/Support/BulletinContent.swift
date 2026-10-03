@@ -1,6 +1,6 @@
 import UIKit
 
-/// The item interface shared by the custom card and native sheet.
+/// The item content and controls displayed in the native sheet.
 final class BulletinContent {
 
     let stackView = UIStackView()

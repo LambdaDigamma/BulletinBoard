@@ -14,10 +14,9 @@ final class BulletinPreviewController: UIViewController {
     private let backgroundImage: UIImage?
     private var hasPresentedBulletin = false
 
-    init(item: BLTNItem, presentationStyle: BLTNPresentationStyle = .custom,
+    init(item: BLTNItem,
          backgroundImage: UIImage? = nil, interfaceStyle: UIUserInterfaceStyle = .unspecified) {
         manager = BLTNItemManager(rootItem: item)
-        manager.presentationStyle = presentationStyle
         self.backgroundImage = backgroundImage
         super.init(nibName: nil, bundle: nil)
         overrideUserInterfaceStyle = interfaceStyle

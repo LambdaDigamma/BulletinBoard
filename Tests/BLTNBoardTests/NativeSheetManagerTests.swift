@@ -5,24 +5,17 @@ import XCTest
 @MainActor
 final class NativeSheetManagerTests: XCTestCase {
 
-    func testNativeRequestUsesCustomPresenterOnOlderReleases() async throws {
+    func testDefaultPresenterIsNativeOnEverySupportedRelease() async throws {
         let (window, parent) = try makePresenter()
         defer { removePresenter(window) }
         let manager = BLTNItemManager(rootItem: NativeSheetTrackingItem())
-        XCTAssertEqual(manager.presentationStyle, .custom)
-        manager.presentationStyle = .nativeSheet
         await show(manager, above: parent)
 
-        if #available(iOS 26.0, *) {
-            XCTAssertTrue(manager.presentationController is NativeBulletinViewController)
-        } else {
-            XCTAssertTrue(manager.presentationController is BulletinViewController)
-        }
+        XCTAssertTrue(manager.presentationController is NativeBulletinViewController)
         await dismiss(manager)
     }
 
     func testLoadingKeepsHeightControlsAndValuesAndRestoresDismissal() async throws {
-        guard #available(iOS 26.0, *) else { throw XCTSkip("Native sheets require iOS 26") }
         let (window, parent) = try makePresenter()
         defer { removePresenter(window) }
         let item = NativeSheetTrackingItem()
@@ -56,7 +49,6 @@ final class NativeSheetManagerTests: XCTestCase {
     }
 
     func testStartupLoadingIndicatorAdaptsToAppearanceAndKeepsExplicitColor() async throws {
-        guard #available(iOS 26.0, *) else { throw XCTSkip("Native sheets require iOS 26") }
         let (window, parent) = try makePresenter()
         defer { removePresenter(window) }
         let item = NativeSheetTrackingItem()
@@ -86,7 +78,6 @@ final class NativeSheetManagerTests: XCTestCase {
     }
 
     func testPushPopRestoresEachItemsHeightAndDismissalPolicy() async throws {
-        guard #available(iOS 26.0, *) else { throw XCTSkip("Native sheets require iOS 26") }
         let (window, parent) = try makePresenter()
         defer { removePresenter(window) }
         let root = NativeSheetTrackingItem(contentHeight: 100)
@@ -101,14 +92,14 @@ final class NativeSheetManagerTests: XCTestCase {
         layout(controller)
         let rootHeight = controller.measuredContentHeight
 
-        manager.push(item: first)
+        await changePage(to: first) { manager.push(item: first) }
         layout(controller)
         let firstHeight = controller.measuredContentHeight
         XCTAssertGreaterThan(firstHeight, rootHeight)
         XCTAssertFalse(controller.presentationControllerShouldDismiss(sheet))
         XCTAssertEqual(root.tearDownCount, 1)
 
-        manager.push(item: second)
+        await changePage(to: second) { manager.push(item: second) }
         layout(controller)
         XCTAssertFalse(controller.presentationControllerShouldDismiss(sheet))
         manager.hideActivityIndicator()
@@ -117,7 +108,7 @@ final class NativeSheetManagerTests: XCTestCase {
         XCTAssertTrue(controller.presentationControllerShouldDismiss(sheet))
         XCTAssertEqual(second.makeViewsCount, 1)
 
-        manager.popItem()
+        await changePage(to: first) { manager.popItem() }
         layout(controller)
         XCTAssertTrue(manager.currentItem === first)
         XCTAssertEqual(controller.measuredContentHeight, firstHeight, accuracy: 0.5)
@@ -126,7 +117,7 @@ final class NativeSheetManagerTests: XCTestCase {
         XCTAssertEqual(first.displayCount, 2)
         XCTAssertEqual(second.tearDownCount, 1)
 
-        manager.popToRootItem()
+        await changePage(to: root) { manager.popToRootItem() }
         layout(controller)
         XCTAssertTrue(manager.currentItem === root)
         XCTAssertEqual(controller.measuredContentHeight, rootHeight, accuracy: 0.5)
@@ -137,7 +128,6 @@ final class NativeSheetManagerTests: XCTestCase {
     }
 
     func testExplicitDismissalAndReleaseCleanUpTheActiveItemOnce() async throws {
-        guard #available(iOS 26.0, *) else { throw XCTSkip("Native sheets require iOS 26") }
         let (window, parent) = try makePresenter()
         defer { removePresenter(window) }
         let item = NativeSheetTrackingItem()
@@ -157,7 +147,6 @@ final class NativeSheetManagerTests: XCTestCase {
     }
 
     func testNativeDismissalIgnoresDuplicateDelegateCallbacksAndCanReopen() async throws {
-        guard #available(iOS 26.0, *) else { throw XCTSkip("Native sheets require iOS 26") }
         let (window, parent) = try makePresenter()
         defer { removePresenter(window) }
         let item = NativeSheetTrackingItem()
@@ -187,7 +176,6 @@ final class NativeSheetManagerTests: XCTestCase {
     }
 
     func testOverlayPresentationKeepsTheBulletinAndItemActive() async throws {
-        guard #available(iOS 26.0, *) else { throw XCTSkip("Native sheets require iOS 26") }
         let (window, parent) = try makePresenter()
         defer { removePresenter(window) }
         let item = NativeSheetTrackingItem()
@@ -210,7 +198,6 @@ final class NativeSheetManagerTests: XCTestCase {
     }
 
     func testDisplayCallbackCanPushTheNextNativeItem() async throws {
-        guard #available(iOS 26.0, *) else { throw XCTSkip("Native sheets require iOS 26") }
         let (window, parent) = try makePresenter()
         defer { removePresenter(window) }
         let root = NativeSheetTrackingItem()
@@ -218,6 +205,7 @@ final class NativeSheetManagerTests: XCTestCase {
         root.presentationHandler = { item in item.manager?.push(item: next) }
         let manager = nativeManager(root)
         await show(manager, above: parent)
+        await waitForDisplay(next)
         XCTAssertTrue(manager.currentItem === next)
         XCTAssertTrue(next.manager === manager)
         XCTAssertEqual(root.tearDownCount, 1)
@@ -227,7 +215,6 @@ final class NativeSheetManagerTests: XCTestCase {
     }
 
     func testDisablingSwipeStillAllowsExplicitDismissal() async throws {
-        guard #available(iOS 26.0, *) else { throw XCTSkip("Native sheets require iOS 26") }
         let (window, parent) = try makePresenter()
         defer { removePresenter(window) }
         let item = NativeSheetTrackingItem()
@@ -243,7 +230,6 @@ final class NativeSheetManagerTests: XCTestCase {
     }
 
     func testNativeScenePresentationKeepsTheExistingWindow() async throws {
-        guard #available(iOS 26.0, *) else { throw XCTSkip("Native sheets require iOS 26") }
         let (window, parent) = try makePresenter()
         defer { removePresenter(window) }
         let scene = try XCTUnwrap(window.windowScene)
@@ -260,7 +246,6 @@ final class NativeSheetManagerTests: XCTestCase {
     }
 
     func testLongNativePageHasAVisibleViewportAfterDismissalAndReopen() async throws {
-        guard #available(iOS 26.0, *) else { throw XCTSkip("Native sheets require iOS 26") }
         let (window, parent) = try makePresenter()
         defer { removePresenter(window) }
         let intro = nativeManager(NativeSheetTrackingItem())
@@ -283,7 +268,7 @@ final class NativeSheetManagerTests: XCTestCase {
         }
     }
 
-    func testDismissalDuringCustomPushDoesNotDisplayAStaleItem() async throws {
+    func testDismissalDuringNativePushDoesNotDisplayAStaleItem() async throws {
         let (window, parent) = try makePresenter()
         defer { removePresenter(window) }
         let manager = BLTNItemManager(rootItem: NativeSheetTrackingItem())
@@ -301,9 +286,149 @@ final class NativeSheetManagerTests: XCTestCase {
         XCTAssertEqual(next.displayCount, 0)
     }
 
+    func testRapidPushCancelsTheOutgoingPageAndRestoresInput() async throws {
+        let (window, parent) = try makePresenter()
+        defer { removePresenter(window) }
+        let manager = nativeManager(NativeSheetTrackingItem())
+        await show(manager, above: parent)
+        let controller = try XCTUnwrap(manager.presentationController as? NativeBulletinViewController)
+        let first = NativeSheetTrackingItem(contentHeight: 420)
+        let last = NativeSheetTrackingItem(contentHeight: 100)
+        let originalHeight = controller.measuredContentHeight
+        manager.push(item: first)
+        XCTAssertTrue(controller.isTransitioningItem)
+        XCTAssertFalse(controller.contentContainer.isUserInteractionEnabled)
+        await changePage(to: last) {
+            manager.push(item: last)
+            layout(controller)
+            XCTAssertEqual(controller.measuredContentHeight, originalHeight, accuracy: 0.5)
+        }
+        XCTAssertEqual(first.displayCount, 0)
+        XCTAssertEqual(first.tearDownCount, 1)
+        XCTAssertEqual(last.willDisplayCount, 1)
+        XCTAssertEqual(last.displayCount, 1)
+        XCTAssertFalse(controller.isTransitioningItem)
+        XCTAssertTrue(controller.contentContainer.isUserInteractionEnabled)
+        XCTAssertEqual(controller.view.subviews.count, 1, "No outgoing snapshot remains")
+        await dismiss(manager)
+    }
+
+    func testLoadingDuringPageFadePreservesViewsAndCompletesDisplayOnce() async throws {
+        let (window, parent) = try makePresenter()
+        defer { removePresenter(window) }
+        let manager = nativeManager(NativeSheetTrackingItem())
+        await show(manager, above: parent)
+        let controller = try XCTUnwrap(manager.presentationController as? NativeBulletinViewController)
+        for delay in [0, 200] {
+            let next = NativeSheetTrackingItem(contentHeight: 300)
+            manager.push(item: next)
+            if delay > 0 { try await Task.sleep(for: .milliseconds(delay)) }
+            let field = try XCTUnwrap(next.textField)
+            field.text = "Keep this edit"
+            let height = controller.measuredContentHeight
+            manager.displayActivityIndicator()
+            layout(controller)
+            XCTAssertEqual(controller.measuredContentHeight, height, accuracy: 0.5)
+            XCTAssertEqual(controller.activityIndicator.alpha, 1)
+            XCTAssertFalse(controller.isTransitioningItem)
+            XCTAssertEqual(controller.view.subviews.count, 1)
+            XCTAssertTrue(controller.isModalInPresentation)
+            await changePage(to: next) { manager.hideActivityIndicator() }
+            XCTAssertTrue(next.textField === field)
+            XCTAssertEqual(field.text, "Keep this edit")
+            XCTAssertEqual(next.makeViewsCount, 1)
+            XCTAssertEqual(next.willDisplayCount, 1)
+            XCTAssertEqual(next.displayCount, 1)
+            XCTAssertFalse(controller.isModalInPresentation)
+            XCTAssertEqual(controller.contentStackView.alpha, 1)
+        }
+        await dismiss(manager)
+    }
+
+    func testPageHeightAnimatesThroughIntermediateSizesInBothDirections() async throws {
+        guard !UIAccessibility.isReduceMotionEnabled else { throw XCTSkip("Reduce Motion disables size animation") }
+        let (window, parent) = try makePresenter()
+        defer { removePresenter(window) }
+        let short = NativeSheetTrackingItem(contentHeight: 80)
+        let tall = NativeSheetTrackingItem(contentHeight: 400)
+        let manager = nativeManager(short)
+        await show(manager, above: parent)
+        let controller = try XCTUnwrap(manager.presentationController as? NativeBulletinViewController)
+
+        for item in [tall, short] {
+            let start = controller.view.bounds.height
+            manager.push(item: item)
+            var heights: [CGFloat] = []
+            var opacities: [Float] = []
+            for _ in 0..<45 {
+                try await Task.sleep(for: .milliseconds(20))
+                heights.append(controller.view.layer.presentation()?.bounds.height ?? controller.view.bounds.height)
+                opacities.append(controller.contentStackView.layer.presentation()?.opacity ?? controller.contentStackView.layer.opacity)
+            }
+            let end = controller.view.bounds.height
+            XCTAssertGreaterThan(abs(end - start), 100)
+            XCTAssertTrue(heights.contains { $0 > min(start, end) + 2 && $0 < max(start, end) - 2 },
+                          "The sheet must pass through intermediate heights: \(heights)")
+            XCTAssertTrue(opacities.contains { $0 > 0.02 && $0 < 0.98 },
+                          "New content must fade through intermediate opacity: \(opacities)")
+            XCTAssertFalse(controller.isTransitioningItem)
+            XCTAssertEqual(controller.contentStackView.alpha, 1)
+        }
+        await dismiss(manager)
+    }
+
+    func testWillDisplayCanReplaceThePageWithoutCompletingTheOldFade() async throws {
+        let (window, parent) = try makePresenter()
+        defer { removePresenter(window) }
+        let manager = nativeManager(NativeSheetTrackingItem())
+        await show(manager, above: parent)
+        let first = NativeSheetTrackingItem(contentHeight: 400)
+        let last = NativeSheetTrackingItem(contentHeight: 100)
+        first.willDisplayHandler = { [weak manager] in manager?.push(item: last) }
+        manager.push(item: first)
+        await waitForDisplay(last)
+        XCTAssertTrue(manager.currentItem === last)
+        XCTAssertEqual(first.willDisplayCount, 1)
+        XCTAssertEqual(first.displayCount, 0)
+        XCTAssertEqual(first.tearDownCount, 1)
+        XCTAssertEqual(last.displayCount, 1)
+        await dismiss(manager)
+    }
+
+    func testDisabledAnimationsApplyThePageAndCallbacksImmediately() async throws {
+        let (window, parent) = try makePresenter()
+        defer { removePresenter(window) }
+        let manager = nativeManager(NativeSheetTrackingItem())
+        await show(manager, above: parent)
+        let next = NativeSheetTrackingItem(contentHeight: 400)
+        UIView.performWithoutAnimation { manager.push(item: next) }
+        let controller = try XCTUnwrap(manager.presentationController as? NativeBulletinViewController)
+        XCTAssertFalse(controller.isTransitioningItem)
+        XCTAssertEqual(next.willDisplayCount, 1)
+        XCTAssertEqual(next.displayCount, 1)
+        XCTAssertTrue(controller.contentContainer.isUserInteractionEnabled)
+        XCTAssertEqual(controller.contentStackView.alpha, 1)
+        await dismiss(manager)
+    }
+
+    private func changePage(to item: BLTNItem, change: () -> Void) async {
+        let displayed = expectation(description: "Page displayed")
+        item.presentationHandler = { _ in displayed.fulfill() }
+        change()
+        await fulfillment(of: [displayed], timeout: 3)
+        item.presentationHandler = nil
+    }
+
+    private func waitForDisplay(_ item: NativeSheetTrackingItem) async {
+        if item.displayCount > 0 { return }
+        let displayed = expectation(description: "Page displayed")
+        item.presentationHandler = { _ in displayed.fulfill() }
+        await fulfillment(of: [displayed], timeout: 3)
+        item.presentationHandler = nil
+    }
+
     private func nativeManager(_ item: BLTNItem) -> BLTNItemManager {
         let manager = BLTNItemManager(rootItem: item)
-        manager.presentationStyle = .nativeSheet
         return manager
     }
 

@@ -31,7 +31,7 @@ bulletinManager.showBulletin(above: self)
 
 For onboarding, call it in `viewDidAppear(_:)` after checking if the user has already completed onboarding. Present it once, after the presenting controller is in its window.
 
-Cards adapt to window size changes, the keyboard, and partial folding on iPhone Duo. Content that exceeds the clear region scrolls inside the card. Custom views must allow their width to shrink and must provide a complete vertical layout. See [Adaptive layout](Adaptive%20Layout.md).
+Native sheets adapt to window size changes and the keyboard. Tall content scrolls inside the sheet. On iPhone Duo, a tall sheet can span a horizontal fold. Custom views must allow their width to shrink and must provide a complete vertical layout. See [Adaptive layout](Adaptive%20Layout.md).
 
 ## Creating Page Items
 
@@ -165,24 +165,13 @@ This creates the following interaction:
 
 ![Activity Indicator](https://raw.githubusercontent.com/alexaubry/BulletinBoard/master/.assets/demo_activity.png)
 
-## Customizing the Background View
+## Sheet Appearance
 
-By default, the content behind the card is covered with a semi-opaque view (known as the `.dimming` style).
+Bulletins use native UIKit sheets on iOS 17 and later. The content uses an adaptive system background. On iOS 26.1 and later, the entire sheet uses a solid system background. UIKit controls sheet corners, margins, placement, and keyboard movement.
 
-You can customize the background view by changing the `backgroundViewStyle` property of the manager before calling `showBulletin()`.
+The old `backgroundColor`, `backgroundViewStyle`, `edgeSpacing`, `cardCornerRadius`, `presentationStyle`, and item `shouldRespondToKeyboardChanges` properties remain as deprecated compatibility settings. They have no effect. Customize the item content and its `appearance` instead.
 
-**Example**:
-
-~~~swift
-manager.backgroundViewStyle = .blurredExtraLight
-manager.showBulletin(above: self)
-~~~
-
-Several styles are available in the `BulletinBackgroundViewStyle` enum:
-
-![Dimming View](https://raw.githubusercontent.com/alexaubry/BulletinBoard/master/.assets/demo_background_styles.png)
-
-> Note: blurred backgrounds are available in iOS 10.0 and later.
+Page changes fade the old content out, animate the sheet to the new content height, and fade the new content in. `willDisplay()` runs before the new content fades in. `onDisplay()` runs after the content fade. UIKit controls the separate sheet resize duration. Reduce Motion disables these page animations.
 
 ## Dismissal
 
@@ -200,4 +189,4 @@ To create custom bulletin items, create a class that implements the `BLTNItem` p
 
 BulletinBoard uses stack views and Auto Layout to display and manage cards. It automatically adapts to changes in width and height. iPad and iPhone X are supported out of the box.
 
-If you are interested in learning how it works in more details, look at the implementation of `BLTNManager`, `BulletinViewController` and `BLTNInterfaceBuilder`.
+If you are interested in learning how it works in more details, look at the implementation of `BLTNItemManager`, `NativeBulletinViewController` and `BLTNInterfaceBuilder`.

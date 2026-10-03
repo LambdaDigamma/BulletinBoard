@@ -6,7 +6,6 @@ import XCTest
 final class NativeSheetLayoutTests: XCTestCase {
 
     func testCloseButtonKeepsAReachableHeaderAboveScrollingContentInBothDirections() throws {
-        guard #available(iOS 26.0, *) else { throw XCTSkip("Native sheets require iOS 26") }
         let text = UILabel()
         text.numberOfLines = 0
         text.text = String(repeating: "Long content must not scroll under Close. ", count: 40)
@@ -41,12 +40,10 @@ final class NativeSheetLayoutTests: XCTestCase {
         XCTAssertEqual(controller.contentScrollView.frame.minY, 0, accuracy: 0.5)
     }
 
-    @available(iOS 26.0, *)
     private typealias Fixture = (window: UIWindow, parent: UIViewController,
                                 controller: NativeBulletinViewController, manager: BLTNItemManager)
 
     func testWidthAndAsymmetricSafeAreaChangesRecomputeContentHeight() throws {
-        guard #available(iOS 26.0, *) else { throw XCTSkip("Native sheets require iOS 26") }
         let text = UILabel()
         text.numberOfLines = 0
         text.text = String(repeating: "Content must fit the current sheet width. ", count: 24)
@@ -71,7 +68,6 @@ final class NativeSheetLayoutTests: XCTestCase {
     }
 
     func testLongContentCanScrollItsFinalActionIntoViewAndReceiveATap() throws {
-        guard #available(iOS 26.0, *) else { throw XCTSkip("Native sheets require iOS 26") }
         let content = UIView()
         content.heightAnchor.constraint(equalToConstant: 900).isActive = true
         let action = UIButton(type: .system)
@@ -94,7 +90,6 @@ final class NativeSheetLayoutTests: XCTestCase {
     }
 
     func testDynamicTypeChangeUpdatesTheNativeContentHeight() throws {
-        guard #available(iOS 26.0, *) else { throw XCTSkip("Native sheets require iOS 26") }
         let text = UILabel()
         text.numberOfLines = 0
         text.font = .preferredFont(forTextStyle: .body)
@@ -110,7 +105,6 @@ final class NativeSheetLayoutTests: XCTestCase {
     }
 
     func testRetainedContentDoesNotKeepTheNativeControllerAlive() throws {
-        guard #available(iOS 26.0, *) else { throw XCTSkip("Native sheets require iOS 26") }
         let manager = BLTNItemManager(rootItem: BLTNItem())
         var controller: NativeBulletinViewController? = NativeBulletinViewController()
         controller?.manager = manager
@@ -125,7 +119,6 @@ final class NativeSheetLayoutTests: XCTestCase {
         }
     }
 
-    @available(iOS 26.0, *)
     private func makeFixture(size: CGSize, content: [UIView]) -> Fixture {
         let manager = BLTNItemManager(rootItem: BLTNItem())
         let window = UIWindow(frame: CGRect(origin: .zero, size: size))
@@ -151,7 +144,6 @@ final class NativeSheetLayoutTests: XCTestCase {
         return fixture
     }
 
-    @available(iOS 26.0, *)
     private func layout(_ fixture: Fixture, size: CGSize? = nil) {
         UIView.performWithoutAnimation {
             if let size {
@@ -168,7 +160,6 @@ final class NativeSheetLayoutTests: XCTestCase {
         }
     }
 
-    @available(iOS 26.0, *)
     private func removeFixture(_ fixture: Fixture) {
         fixture.controller.willMove(toParent: nil)
         fixture.controller.view.removeFromSuperview()

@@ -5,7 +5,6 @@ import UIKit
 @available(iOS 17, *)
 final class FrameworkPreviewController: UIViewController {
     private let scenario: FrameworkPreviewScenario
-    private let presentationStyle: BLTNPresentationStyle
     private let previewContentSize: UIContentSizeCategory?
     private let previewRightToLeft: Bool
     private var manager: BLTNItemManager?
@@ -13,11 +12,10 @@ final class FrameworkPreviewController: UIViewController {
     private var loadingTask: Task<Void, Never>?
     private let statusLabel = UILabel()
 
-    init(scenario: FrameworkPreviewScenario, presentationStyle: BLTNPresentationStyle = .custom,
+    init(scenario: FrameworkPreviewScenario,
          interfaceStyle: UIUserInterfaceStyle = .unspecified,
          contentSize: UIContentSizeCategory? = nil, rightToLeft: Bool = false) {
         self.scenario = scenario
-        self.presentationStyle = presentationStyle
         self.previewContentSize = contentSize
         self.previewRightToLeft = rightToLeft
         super.init(nibName: nil, bundle: nil)
@@ -91,7 +89,6 @@ final class FrameworkPreviewController: UIViewController {
         let item = scenario.makeItem { [weak self] form in self?.submit(form) }
         recordEvents(for: item)
         let manager = BLTNItemManager(rootItem: item)
-        manager.presentationStyle = presentationStyle
         self.manager = manager
         manager.showBulletin(above: self, animated: false)
         // UIKit can present from an ancestor outside the canvas host's trait scope.
@@ -130,6 +127,7 @@ final class FrameworkPreviewController: UIViewController {
         let title = item.title
         item.presentationHandler = { [weak self] _ in self?.statusLabel.text = "Presented: \(title)" }
         item.dismissalHandler = { [weak self] _ in self?.statusLabel.text = "Dismissed: \(title). Show Bulletin starts a new flow." }
+        if let next = item.next as? BLTNPageItem { recordEvents(for: next) }
     }
 
     private static func makeBackground() -> UIImage {

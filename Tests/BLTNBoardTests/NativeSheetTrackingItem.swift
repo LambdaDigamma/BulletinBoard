@@ -12,6 +12,7 @@ final class NativeSheetTrackingItem: BLTNItem {
     private(set) var displayCount = 0
     private(set) var dismissCount = 0
     private(set) var textField: UITextField?
+    var willDisplayHandler: (() -> Void)?
 
     init(contentHeight: CGFloat = 140) {
         self.contentHeight = contentHeight
@@ -34,7 +35,10 @@ final class NativeSheetTrackingItem: BLTNItem {
 
     override func setUp() { setUpCount += 1 }
     override func tearDown() { tearDownCount += 1 }
-    override func willDisplay() { willDisplayCount += 1 }
+    override func willDisplay() {
+        willDisplayCount += 1
+        willDisplayHandler?()
+    }
 
     override func onDisplay() {
         displayCount += 1

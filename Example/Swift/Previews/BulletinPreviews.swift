@@ -39,32 +39,15 @@ import CustomBulletins
     BulletinPreviewController(item: BulletinDataSource.makePetCarePage())
 }
 
-@available(iOS 26, *)
-#Preview("Native Sheet — Name", traits: .fixedLayout(width: 320, height: 568)) {
-    BulletinPreviewController(item: BulletinDataSource.makeTextFieldPage(), presentationStyle: .nativeSheet,
-                              backgroundImage: UIImage(named: "dog_img_1"), interfaceStyle: .light)
-}
-
-@available(iOS 26, *)
-#Preview("Native Sheet — Name — Dark", traits: .fixedLayout(width: 320, height: 568)) {
-    BulletinPreviewController(item: BulletinDataSource.makeTextFieldPage(), presentationStyle: .nativeSheet,
+@available(iOS 17, *)
+#Preview("Name — Dark", traits: .fixedLayout(width: 320, height: 568)) {
+    BulletinPreviewController(item: BulletinDataSource.makeTextFieldPage(),
                               backgroundImage: UIImage(named: "dog_img_1"), interfaceStyle: .dark)
 }
 
-@available(iOS 26, *)
-#Preview("Native Sheet — Pet Photos", traits: .fixedLayout(width: 320, height: 568)) {
-    BulletinPreviewController(item: BulletinDataSource.makePetPhotosPage(), presentationStyle: .nativeSheet)
-}
-
-@available(iOS 26, *)
-#Preview("Native Sheet — Pet Care Guide", traits: .fixedLayout(width: 568, height: 320)) {
-    BulletinPreviewController(item: BulletinDataSource.makePetCarePage(), presentationStyle: .nativeSheet,
-                              backgroundImage: UIImage(named: "dog_img_1"), interfaceStyle: .light)
-}
-
-@available(iOS 26, *)
-#Preview("Native Sheet — Pet Care Guide — Dark", traits: .fixedLayout(width: 568, height: 320)) {
-    BulletinPreviewController(item: BulletinDataSource.makePetCarePage(), presentationStyle: .nativeSheet,
+@available(iOS 17, *)
+#Preview("Pet Care Guide — Dark", traits: .fixedLayout(width: 568, height: 320)) {
+    BulletinPreviewController(item: BulletinDataSource.makePetCarePage(),
                               backgroundImage: UIImage(named: "dog_img_1"), interfaceStyle: .dark)
 }
 #endif

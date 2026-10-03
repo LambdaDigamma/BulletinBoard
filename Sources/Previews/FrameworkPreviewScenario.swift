@@ -6,9 +6,23 @@ enum FrameworkPreviewScenario {
     case actions
     case form
     case longContent
+    case pageSizes
 
     func makeItem(onSubmit: @escaping (FrameworkPreviewFormItem) -> Void) -> BLTNPageItem {
         switch self {
+        case .pageSizes:
+            let short = BLTNPageItem(title: "Short page")
+            short.descriptionText = "Show the longer page to check the height animation. Back returns to this page."
+            short.actionButtonTitle = "Show Longer Page"
+            short.actionHandler = { $0.manager?.displayNextItem() }
+            let tall = BLTNPageItem(title: "Longer page")
+            tall.descriptionText = (1...6).map {
+                "Section \($0): The sheet grows while this content fades in. Scroll to Back, then check that the sheet shrinks."
+            }.joined(separator: "\n\n")
+            tall.actionButtonTitle = "Back"
+            tall.actionHandler = { $0.manager?.popItem() }
+            short.next = tall
+            return short
         case .actions:
             let item = BLTNPageItem(title: "Bulletin actions")
             item.descriptionText = "Open an alert above this bulletin, or close it and use Show Bulletin to start again."

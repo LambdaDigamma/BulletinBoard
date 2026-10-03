@@ -2,21 +2,23 @@
 ## Unreleased
 
 ### New Features
-- Add ten debug-only framework Xcode previews for actions, alerts, forms, loading, push/pop, scrolling, large text, right-to-left layout, and both presenters. Keep the fixtures independent of the demo app.
-- Add optional native UIKit sheets on iOS 26 and later, with trailing placement on iOS 27 and a demo presenter selector. Keep the custom card as the default and as the fallback on older releases.
-- Use one content-height stop for native sheets and a solid light/dark system surface on iOS 26.1 and later, so photos behind the sheet do not reduce text contrast.
-- Let the startup loading indicator adapt to light and dark mode, as the default indicator already does when loading starts later.
-[#1](https://github.com/LambdaDigamma/BulletinBoard/pull/1)
+- Use native UIKit sheets on every supported release, from iOS 17. Keep one content-height stop and scroll long content. Request trailing placement on iOS 27 and use a solid adaptive sheet surface on iOS 26.1 and later.
+- Add seven debug-only framework Xcode previews for page-size transitions, actions, alerts, forms, loading, push/pop, scrolling, large text, dark mode, and right-to-left layout. Keep the fixtures independent of the demo app.
+- Animate sheet height during page changes and fade content out and in. Apply changes directly with Reduce Motion. Cancel stale transitions after a new page, loading, or dismissal.
+- Let the startup loading indicator adapt to light and dark mode.
 
 ### Fixes
-- Use UIKit’s navigation-bar Close item with its standard appearance, accessibility, and interaction. Match the actual card surface and keep native scrolling content below the close header.
-- Keep bulletins clear of an active iPhone Duo fold, fit narrow and short regions, and scroll long content and keyboard forms. Adapt the demo controls and galleries to live width changes.
-[#1](https://github.com/LambdaDigamma/BulletinBoard/pull/1)
-- Preserve displayed controls during loading and clean up each active item once after dismissal. Ignore stale page-transition callbacks after dismissal.
-[#1](https://github.com/LambdaDigamma/BulletinBoard/pull/1)
+- Use UIKit's navigation-bar Close item with standard appearance, accessibility, and interaction. Keep scrolling content below its fixed header.
+- Preserve controls and values during loading, show the spinner immediately if loading interrupts a fade, and clean up each active item once after dismissal.
+- Adapt demo controls and galleries to live width changes.
 
 ### Changed Behavior
-- Require Xcode 27.1 or later to build the Duo APIs. Require iOS 17 or later. Use a default card corner radius of 12 independently of safe-area insets.
+- Require Xcode 27.1 or later and iOS 17 or later.
+- Remove the custom presenter, its fold-region selection, background options, corners, and gestures. UIKit controls sheet placement and keyboard movement. Tall native sheets can span a horizontal Duo fold.
+- Keep `presentationStyle` (including `.custom`), `backgroundColor`, `backgroundViewStyle`, `edgeSpacing`, `cardCornerRadius`, and `shouldRespondToKeyboardChanges` as deprecated compatibility settings with no effect.
+- Present scene bulletins from an existing application controller. Setting `allowsSwipeInteraction = false` also blocks native outside-tap dismissal.
+- Remove obsolete presenter and background selectors from the demo. Retain direct example entries and update all previews to native sheets.
+
 [#1](https://github.com/LambdaDigamma/BulletinBoard/pull/1)
 
 ## 🔖 v6.1.1

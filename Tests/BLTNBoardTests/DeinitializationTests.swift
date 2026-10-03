@@ -58,7 +58,7 @@ final class DeinitializationTests: XCTestCase {
             DispatchQueue.main.async {
                 withUnsafeCurrentTask { XCTAssertNil($0) }
                 DeinitializationTaskLocal.$marker.withValue(17) {
-                    var controller: BulletinViewController? = BulletinViewController()
+                    var controller: NativeBulletinViewController? = NativeBulletinViewController()
                     weak let releasedController = controller
                     controller = nil
                     XCTAssertNil(releasedController)

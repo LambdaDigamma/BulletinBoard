@@ -55,14 +55,8 @@ open class BLTNItem: NSObject {
 
     open var shouldStartWithActivityIndicator: Bool = false
 
-    /**
-     * Whether the item should move with the keyboard.
-     *
-     * You must set it to `true` if the item displays a text field. You can set it to `false` if you
-     * don't want the bulletin to move when system alerts containing a text field (ex: iTunes login)
-     * are displayed.
-     */
-
+    /// Retained for source compatibility. UIKit controls sheet keyboard movement.
+    @available(*, deprecated, message: "UIKit handles sheet keyboard movement. This setting is ignored.")
     open var shouldRespondToKeyboardChanges: Bool = true
 
     /**
