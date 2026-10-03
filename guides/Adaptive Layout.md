@@ -17,13 +17,13 @@ flowchart TD
     Native --> UIKit[One content-height detent; UIKit keyboard and gestures]
     UIKit --> Placement[iOS 27+: request trailing placement]
     Regions --> Content[Shared content stack and scroll view]
-    Placement --> Surface[Opaque light / dark system surface]
+    Placement --> Surface[iOS 26.1+: solid light / dark system surface]
     Surface --> Content
 ```
 
 The native sheet has one content-height detent. A person cannot expand it to a separate full-height stop. Before presentation, it measures content from the presenter's local usable width. It then measures again at the sheet's actual width and limits the detent to UIKit's maximum height. Long content uses one scroll view. Width changes, safe-area changes, and Dynamic Type changes cause a new measurement. UIKit can still adjust the sheet for the keyboard. Loading retains the page height and blocks interactive dismissal.
 
-Native mode uses an opaque `.systemBackground` surface so photos behind the sheet do not reduce text contrast. The surface adapts to light and dark mode. UIKit controls the corner geometry. The grabber stays hidden, because a visible grabber can overlap a horizontal fold. System dismissal gestures remain available. Custom `backgroundColor`, `backgroundViewStyle`, `edgeSpacing`, and `cardCornerRadius` do not set the native sheet appearance. UIKit handles keyboard movement; the custom item's keyboard opt-out does not change native sheet behavior. Setting `allowsSwipeInteraction = false` blocks native interactive dismissal, including dismissal by an outside tap. Explicit action and close-button dismissal remain available when the item allows them.
+On iOS 26.1 and later, native mode uses `UIColorEffect` with `.systemBackground` to replace the sheet's glass with a solid surface. Photos behind the sheet do not reduce text contrast. The surface adapts to light and dark mode. On iOS 26.0, the content has a system background, but UIKit can retain its glass sheet surface. UIKit controls the corner geometry. The grabber stays hidden, because a visible grabber can overlap a horizontal fold. System dismissal gestures remain available. Custom `backgroundColor`, `backgroundViewStyle`, `edgeSpacing`, and `cardCornerRadius` do not set the native sheet appearance. UIKit handles keyboard movement; the custom item's keyboard opt-out does not change native sheet behavior. Setting `allowsSwipeInteraction = false` blocks native interactive dismissal, including dismissal by an outside tap. Explicit action and close-button dismissal remain available when the item allows them.
 
 On iOS 27 and later, the native sheet requests `.trailing` placement. The default native placement stayed centered across the vertical Book fold in the iOS 27.1 simulator; trailing placement moved the short sheet to the clear side. A tall native sheet can span a horizontal fold. Its content must remain scrollable so a person can reach each action.
 

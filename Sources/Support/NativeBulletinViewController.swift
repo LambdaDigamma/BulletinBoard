@@ -49,6 +49,12 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
         sheet.prefersEdgeAttachedInCompactHeight = true
         sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
         sheet.prefersScrollingExpandsWhenScrolledToEdge = false
+        #if !targetEnvironment(macCatalyst)
+        if #available(iOS 26.1, *) {
+            // Replace the sheet's glass, including the area outside the content safe area.
+            sheet.backgroundEffect = UIColorEffect(color: .systemBackground)
+        }
+        #endif
         sheet.detents = [
             .custom(identifier: Self.contentDetentIdentifier) { [weak self] context in
                 guard let self, self.measuredContentHeight > 0 else {
@@ -65,9 +71,8 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
 
     override func loadView() {
         super.loadView()
-        // Keep text readable over photos at every sheet height and in both color schemes.
+        // Provide an adaptive content background on every supported native-sheet release.
         view.backgroundColor = .systemBackground
-        // Keep the content surface opaque during system sheet appearance changes.
         contentContainer.backgroundColor = .systemBackground
         contentContainer.accessibilityViewIsModal = true
         contentContainer.translatesAutoresizingMaskIntoConstraints = false

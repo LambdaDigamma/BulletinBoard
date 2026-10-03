@@ -40,7 +40,7 @@ Scripts/test-ios-hosted.sh -destination 'platform=iOS Simulator,name=iPhone 18 P
     -only-testing:BLTNBoardTests/DeinitializationTests
 ```
 
-Native manager tests check loading locks, unchanged field instances and values, push/pop callbacks and height changes, explicit and native dismissal cleanup, duplicate delegate callbacks, a visible viewport after reopening long content, scene presentation, overlay presentation, and callback re-entry. Layout tests check width changes, asymmetric safe areas, Dynamic Type, scrolling to a tappable final action, and controller release.
+Native manager tests check loading locks, startup spinner contrast across appearance changes, explicit spinner colors, unchanged field instances and values, push/pop callbacks and height changes, explicit and native dismissal cleanup, duplicate delegate callbacks, a visible viewport after reopening long content, scene presentation, overlay presentation, and callback re-entry. Layout tests check width changes, asymmetric safe areas, Dynamic Type, scrolling to a tappable final action, and controller release.
 
 The hosted script generates a small scene-based app and test project under the ignored `.build/HostedTests` directory. It links the local Swift package and uses the same test sources. A standalone SwiftPM test process has no connected application scene, so it cannot verify a system sheet presentation. The hosted app provides that scene; the original script remains useful for layout, geometry, and lifetime tests.
 

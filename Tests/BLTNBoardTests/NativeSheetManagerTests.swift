@@ -55,6 +55,36 @@ final class NativeSheetManagerTests: XCTestCase {
         await dismiss(manager)
     }
 
+    func testStartupLoadingIndicatorAdaptsToAppearanceAndKeepsExplicitColor() async throws {
+        guard #available(iOS 26.0, *) else { throw XCTSkip("Native sheets require iOS 26") }
+        let (window, parent) = try makePresenter()
+        defer { removePresenter(window) }
+        let item = NativeSheetTrackingItem()
+        item.shouldStartWithActivityIndicator = true
+        let manager = nativeManager(item)
+        await show(manager, above: parent)
+        let controller = try XCTUnwrap(manager.presentationController as? NativeBulletinViewController)
+        let color = try XCTUnwrap(controller.activityIndicator.color)
+
+        for style in [UIUserInterfaceStyle.light, .dark] {
+            controller.traitOverrides.userInterfaceStyle = style
+            layout(controller)
+            var brightness: CGFloat = 0
+            var alpha: CGFloat = 0
+            XCTAssertTrue(color.resolvedColor(with: controller.traitCollection).getWhite(&brightness, alpha: &alpha))
+            XCTAssertEqual(alpha, 1)
+            if style == .dark {
+                XCTAssertGreaterThan(brightness, 0.5)
+            } else {
+                XCTAssertLessThan(brightness, 0.5)
+            }
+        }
+
+        manager.displayActivityIndicator(color: .systemOrange)
+        XCTAssertEqual(controller.activityIndicator.color, .systemOrange)
+        await dismiss(manager)
+    }
+
     func testPushPopRestoresEachItemsHeightAndDismissalPolicy() async throws {
         guard #available(iOS 26.0, *) else { throw XCTSkip("Native sheets require iOS 26") }
         let (window, parent) = try makePresenter()

@@ -138,7 +138,7 @@ public final class BLTNItemManager {
     fileprivate var isPrepared: Bool = false
     fileprivate var isPreparing: Bool = false
     fileprivate var shouldDisplayActivityIndicator: Bool = false
-    fileprivate var lastActivityIndicatorColor: UIColor = .black
+    fileprivate var lastActivityIndicatorColor: UIColor = .label
     private var interfaceGeneration = 0
     private var isDismissingBulletin = false
     private var hasPreparedPresentation = false
