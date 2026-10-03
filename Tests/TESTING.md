@@ -16,7 +16,7 @@ Before the fix, the animation phase test aborts on iOS 18.6 in `TaskLocal::StopL
 
 ## Focused layout checks
 
-Use `-only-testing:BLTNBoardTests/NativeSheetLayoutTests` with either script to check width changes, asymmetric safe areas, Dynamic Type, the fixed Close header, long-content scrolling, final-action hit testing, and controller release. Repeat affected tests on an older installed runtime. Use the [Duo demo checks](../guides/Adaptive%20Layout.md) for real fold, keyboard, and gallery interactions. Package tests do not build the demo targets.
+Use `-only-testing:BLTNBoardTests/NativeSheetLayoutTests` with either script to check width changes, asymmetric safe areas, Dynamic Type, the fixed Close header, long-content scrolling, 12-point bottom clearance across changing insets, final-action hit testing, and controller release. Repeat affected tests on an older installed runtime. Use the [Duo demo checks](../guides/Adaptive%20Layout.md) for real fold, keyboard, and gallery interactions. Package tests do not build the demo targets.
 
 ## Framework preview fixture check
 
@@ -38,7 +38,7 @@ Scripts/test-ios-hosted.sh -destination 'platform=iOS Simulator,name=iPhone 18 P
     -only-testing:BLTNBoardTests/DeinitializationTests
 ```
 
-Native manager tests check loading locks, startup spinner contrast across appearance changes, explicit spinner colors, unchanged field instances and values, push/pop callbacks and height changes, explicit and native dismissal cleanup, duplicate delegate callbacks, a visible viewport after reopening long content, scene presentation, overlay presentation, and callback re-entry. Transition tests also sample the presented layer during growth and shrinkage to confirm intermediate heights and content opacity. They check rapid push cancellation, loading during both fade phases, dismissal during a fade, callback re-entry, and the immediate path when UIView animations are disabled. Layout tests check width changes, asymmetric safe areas, Dynamic Type, scrolling to a tappable final action, and controller release.
+Native manager tests check loading locks, startup spinner contrast across appearance changes, explicit spinner colors, unchanged field instances and values, push/pop callbacks and height changes, explicit and native dismissal cleanup, duplicate delegate callbacks, a visible viewport after reopening long content, scene presentation, overlay presentation, and callback re-entry. A short-page test compares automatic scroll insets with a frame pinned to the bottom safe-area guide and confirms the same final-button position. Transition tests also sample the presented layer during growth and shrinkage to confirm intermediate heights and content opacity. They check rapid push cancellation, loading during both fade phases, dismissal during a fade, callback re-entry, and the immediate path when UIView animations are disabled. Layout tests check width changes, asymmetric safe areas, Dynamic Type, scrolling to a tappable final action, and controller release.
 
 The hosted script generates a small scene-based app and test project under the ignored `.build/HostedTests` directory. It links the local Swift package and uses the same test sources. A standalone SwiftPM test process has no connected application scene, so it cannot verify a system sheet presentation. The hosted app provides that scene; the original script remains useful for layout, geometry, and lifetime tests.
 

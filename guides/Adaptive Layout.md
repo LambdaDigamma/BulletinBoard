@@ -9,12 +9,14 @@ Each sheet has one content-height detent. It has no second full-height stop. Bef
 ```mermaid
 flowchart TD
     Manager[BLTNItemManager: item stack and callbacks] --> Sheet[Native sheet controller]
-    Bounds[Local width, safe area, and text size] --> Measure[Measure content stack and Close header]
+    Bounds[Local width, safe area, and text size] --> Measure[Measure content stack, Close header, and bottom margin]
     Sheet --> Measure
     Measure --> Detent[One detent capped at UIKit maximum height]
-    Detent --> UIKit[UIKit placement and keyboard movement]
+    Detent --> UIKit[UIKit placement, safe area, and keyboard movement]
     UIKit --> Scroll[Scroll long content to every action]
 ```
+
+The content has a 12-point bottom margin. The scroll view extends to the sheet edge and lets UIKit adjust its content insets. The custom detent excludes the bottom safe area; UIKit adds that area when the sheet is edge-attached. The margin and safe area therefore have separate purposes. Pinning the scroll frame to the bottom safe-area guide would exclude that region from the viewport, but would not remove the content margin. See [Apple's custom-detent contract](https://developer.apple.com/documentation/uikit/uisheetpresentationcontroller/detent/custom(identifier:resolver:)).
 
 The scroll viewport starts below the fixed Close header. UIKit's navigation-bar Close item supplies the symbol, accessibility label, pressed state, and system appearance. The header follows the system background and layout direction. Empty header space passes touches through. Hiding Close removes its header space.
 

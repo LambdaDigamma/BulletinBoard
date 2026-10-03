@@ -32,6 +32,7 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
     private var outgoingSnapshot: UIView?
 
     private static let contentDetentIdentifier = UISheetPresentationController.Detent.Identifier("bulletinContent")
+    private static let contentBottomMargin: CGFloat = 12
 
     init() {
         super.init(nibName: nil, bundle: nil)
@@ -108,7 +109,7 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
             contentStackView.leadingAnchor.constraint(equalTo: contentScrollView.contentLayoutGuide.leadingAnchor, constant: 24),
             contentStackView.trailingAnchor.constraint(equalTo: contentScrollView.contentLayoutGuide.trailingAnchor, constant: -24),
             stackTopConstraint,
-            contentStackView.bottomAnchor.constraint(equalTo: contentScrollView.contentLayoutGuide.bottomAnchor, constant: -24),
+            contentStackView.bottomAnchor.constraint(equalTo: contentScrollView.contentLayoutGuide.bottomAnchor, constant: -Self.contentBottomMargin),
         ])
 
         contentContainer.addSubview(activityIndicator)
@@ -186,7 +187,8 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
             withHorizontalFittingPriority: .required,
             verticalFittingPriority: .fittingSizeLevel
         ).height
-        let height = max(1, stackHeight + scrollTopConstraint.constant + stackTopConstraint.constant + 24)
+        // A custom detent excludes the bottom safe area; UIKit adds it to an edge-attached sheet.
+        let height = max(1, stackHeight + scrollTopConstraint.constant + stackTopConstraint.constant + Self.contentBottomMargin)
         let scale = max(1, traitCollection.displayScale)
         return ceil(height * scale) / scale
     }

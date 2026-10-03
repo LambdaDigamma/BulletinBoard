@@ -411,6 +411,42 @@ final class NativeSheetManagerTests: XCTestCase {
         await dismiss(manager)
     }
 
+    func testShortPageBottomMarginIsCompactAndSafeAreaAnchorDoesNotAddSpace() async throws {
+        let (window, parent) = try makePresenter()
+        defer { removePresenter(window) }
+        let page = BLTNPageItem(title: "Customize Feed")
+        page.descriptionText = "Choose whether to share your location."
+        page.actionButtonTitle = "Send location data"
+        page.alternativeButtonTitle = "No thanks"
+        page.isDismissable = false
+        let manager = nativeManager(page)
+        await show(manager, above: parent)
+        let controller = try XCTUnwrap(manager.presentationController as? NativeBulletinViewController)
+        let button = try XCTUnwrap(page.alternativeButton)
+        layout(controller)
+        let originalFrame = button.convert(button.bounds, to: controller.view)
+        let safeFrame = controller.view.safeAreaLayoutGuide.layoutFrame
+        XCTAssertEqual(safeFrame.maxY - originalFrame.maxY, 12, accuracy: 1)
+
+        let scroll = controller.contentScrollView
+        let container = controller.contentContainer
+        let bottom = try XCTUnwrap(container.constraints.first {
+            ($0.firstItem as? UIView) === scroll && $0.firstAttribute == .bottom
+                && ($0.secondItem as? UIView) === container && $0.secondAttribute == .bottom
+        })
+        // Compare a frame inside the safe area with automatic scroll-content insets.
+        bottom.isActive = false
+        let safeBottom = scroll.bottomAnchor.constraint(equalTo: container.safeAreaLayoutGuide.bottomAnchor)
+        safeBottom.isActive = true
+        layout(controller)
+        let guideFrame = button.convert(button.bounds, to: controller.view)
+        XCTAssertEqual(guideFrame.maxY, originalFrame.maxY, accuracy: 1)
+        XCTAssertEqual(scroll.frame.maxY, safeFrame.maxY, accuracy: 1)
+        XCTAssertEqual(scroll.adjustedContentInset.bottom, 0, accuracy: 1)
+        XCTAssertEqual(controller.view.safeAreaLayoutGuide.layoutFrame.maxY - guideFrame.maxY, 12, accuracy: 1)
+        await dismiss(manager)
+    }
+
     private func changePage(to item: BLTNItem, change: () -> Void) async {
         let displayed = expectation(description: "Page displayed")
         item.presentationHandler = { _ in displayed.fulfill() }

@@ -89,6 +89,35 @@ final class NativeSheetLayoutTests: XCTestCase {
         XCTAssertTrue(hitView?.isDescendant(of: action) == true)
     }
 
+    func testFinalActionKeepsBottomClearanceAsLocalSafeAreaChanges() throws {
+        let content = UIView()
+        content.heightAnchor.constraint(equalToConstant: 900).isActive = true
+        let action = UIButton(type: .system)
+        action.setTitle("Done", for: .normal)
+        action.heightAnchor.constraint(equalToConstant: 44).isActive = true
+        let fixture = makeFixture(size: CGSize(width: 360, height: 280), content: [content, action])
+        defer { removeFixture(fixture) }
+        let controller = fixture.controller
+        let scroll = controller.contentScrollView
+        for insets in [UIEdgeInsets.zero,
+                       UIEdgeInsets(top: 0, left: 32, bottom: 30, right: 8),
+                       UIEdgeInsets(top: 0, left: 8, bottom: 12, right: 32)] {
+            controller.additionalSafeAreaInsets = insets
+            layout(fixture)
+            scroll.setContentOffset(CGPoint(x: -scroll.adjustedContentInset.left,
+                                           y: scroll.contentSize.height + scroll.adjustedContentInset.bottom - scroll.bounds.height),
+                                    animated: false)
+            layout(fixture)
+            let frame = action.convert(action.bounds, to: controller.view)
+            let safeFrame = controller.view.safeAreaLayoutGuide.layoutFrame
+            XCTAssertEqual(safeFrame.maxY - frame.maxY, 12, accuracy: 1)
+            XCTAssertGreaterThanOrEqual(frame.minX, safeFrame.minX)
+            XCTAssertLessThanOrEqual(frame.maxX, safeFrame.maxX)
+            let hit = controller.view.hitTest(CGPoint(x: frame.midX, y: frame.midY), with: nil)
+            XCTAssertTrue(hit?.isDescendant(of: action) == true)
+        }
+    }
+
     func testDynamicTypeChangeUpdatesTheNativeContentHeight() throws {
         let text = UILabel()
         text.numberOfLines = 0
