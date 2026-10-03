@@ -56,7 +56,6 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
                 }
                 return min(self.measuredContentHeight, context.maximumDetentValue)
             },
-            .large(),
         ]
         sheet.selectedDetentIdentifier = Self.contentDetentIdentifier
         if #available(iOS 27.0, *) {
@@ -66,7 +65,8 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
 
     override func loadView() {
         super.loadView()
-        view.backgroundColor = .clear
+        // Keep text readable over photos at every sheet height and in both color schemes.
+        view.backgroundColor = .systemBackground
         contentContainer.backgroundColor = .clear
         contentContainer.accessibilityViewIsModal = true
         contentContainer.translatesAutoresizingMaskIntoConstraints = false

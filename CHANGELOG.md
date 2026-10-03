@@ -3,6 +3,7 @@
 
 ### New Features
 - Add optional native UIKit sheets on iOS 26 and later, with trailing placement on iOS 27 and a demo presenter selector. Keep the custom card as the default and as the fallback on older releases.
+- Use one content-height stop and an opaque light/dark system surface for native sheets, so photos behind the sheet do not reduce text contrast.
 [#1](https://github.com/LambdaDigamma/BulletinBoard/pull/1)
 
 ### Fixes

@@ -44,7 +44,7 @@ manager.presentationStyle = .nativeSheet
 manager.showBulletin(above: self)
 ```
 
-The default remains `.custom`. A native-sheet request falls back to the custom card on older releases. Native mode uses system appearance, detents, scrolling, and keyboard behavior. On iOS 27 or later, it requests trailing placement for the Book posture. Tall native sheets can span a horizontal fold.
+The default remains `.custom`. A native-sheet request falls back to the custom card on older releases. Native mode uses an opaque system background, one content-height stop, scrolling, and system keyboard behavior. The background adapts to light and dark mode. On iOS 27 or later, it requests trailing placement for the Book posture. Tall native sheets can span a horizontal fold.
 
 See [Adaptive layout](guides/Adaptive%20Layout.md) for placement rules, customization, and validation.
 

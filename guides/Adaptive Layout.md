@@ -14,15 +14,16 @@ flowchart TD
     Choice -->|custom or older iOS| Custom[Custom card presenter]
     Choice -->|nativeSheet on iOS 26+| Native[Native sheet presenter]
     Custom --> Regions[Choose a clear fold region]
-    Native --> UIKit[UIKit: detents, keyboard, gestures]
+    Native --> UIKit[One content-height detent; UIKit keyboard and gestures]
     UIKit --> Placement[iOS 27+: request trailing placement]
     Regions --> Content[Shared content stack and scroll view]
-    Placement --> Content
+    Placement --> Surface[Opaque light / dark system surface]
+    Surface --> Content
 ```
 
-The native sheet starts at the content height and has a full-height detent. Before presentation, it measures content from the presenter's local usable width. It then measures again at the sheet's actual width and limits the detent to UIKit's maximum height. Long content uses one scroll view. Width changes, safe-area changes, and Dynamic Type changes cause a new measurement. Loading retains the page height and blocks interactive dismissal.
+The native sheet has one content-height detent. A person cannot expand it to a separate full-height stop. Before presentation, it measures content from the presenter's local usable width. It then measures again at the sheet's actual width and limits the detent to UIKit's maximum height. Long content uses one scroll view. Width changes, safe-area changes, and Dynamic Type changes cause a new measurement. UIKit can still adjust the sheet for the keyboard. Loading retains the page height and blocks interactive dismissal.
 
-Native mode uses the system sheet background and corner geometry. It keeps the system default with the grabber hidden, because a visible grabber can overlap a horizontal fold. System drag gestures remain available. Custom `backgroundColor`, `backgroundViewStyle`, `edgeSpacing`, and `cardCornerRadius` do not set the native sheet appearance. UIKit handles keyboard movement; the custom item's keyboard opt-out does not change native sheet behavior. Setting `allowsSwipeInteraction = false` blocks native interactive dismissal, including dismissal by an outside tap. Explicit action and close-button dismissal remain available when the item allows them.
+Native mode uses an opaque `.systemBackground` surface so photos behind the sheet do not reduce text contrast. The surface adapts to light and dark mode. UIKit controls the corner geometry. The grabber stays hidden, because a visible grabber can overlap a horizontal fold. System dismissal gestures remain available. Custom `backgroundColor`, `backgroundViewStyle`, `edgeSpacing`, and `cardCornerRadius` do not set the native sheet appearance. UIKit handles keyboard movement; the custom item's keyboard opt-out does not change native sheet behavior. Setting `allowsSwipeInteraction = false` blocks native interactive dismissal, including dismissal by an outside tap. Explicit action and close-button dismissal remain available when the item allows them.
 
 On iOS 27 and later, the native sheet requests `.trailing` placement. The default native placement stayed centered across the vertical Book fold in the iOS 27.1 simulator; trailing placement moved the short sheet to the clear side. A tall native sheet can span a horizontal fold. Its content must remain scrollable so a person can reach each action.
 
@@ -72,6 +73,7 @@ Check these paths in the iPhone Duo simulator:
 5. Open **Favorite Pets**, continue to the gallery, scroll to **Validate** and **Change**, and change the window width.
 6. Dismiss and reopen. Repeat with a compact iPhone and an older supported iOS runtime.
 7. With native mode selected, show loading, change the current item, and present an alert above the sheet. Check that loading blocks interactive dismissal and that closing the alert keeps the bulletin active.
+8. Check native text over a busy photo in light and dark mode. Drag the sheet upward and release; it must return to its content-height stop. Tall content must still scroll to the final action.
 
 Focused regression tests are described in [Testing](../Tests/TESTING.md).
 
