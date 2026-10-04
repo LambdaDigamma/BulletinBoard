@@ -16,13 +16,13 @@ flowchart TD
     UIKit --> Scroll[Scroll long content to every action]
 ```
 
-The content keeps at least 12 points of total bottom clearance. The local safe area provides that space first. Extra padding is only the amount needed to reach 12 points. A 34-point safe area adds no padding; a 6-point safe area adds 6 points; no bottom inset adds 12 points. The remaining padding updates during layout when the safe area changes.
+Content without a Close header has a 32-point top gap. The content keeps at least 32 points of total bottom clearance to match that gap in a floating sheet. The local safe area provides the bottom space first. Extra padding is only the amount needed to reach 32 points. A 34-point safe area adds no padding; a 6-point safe area adds 26 points; no bottom inset adds 32 points. The remaining padding updates during layout when the safe area changes.
 
 | Bottom safe-area inset | Extra padding | Total clearance |
 | --- | --- | --- |
-| 0 pt | 12 pt | 12 pt |
-| 6 pt | 6 pt | 12 pt |
-| 12 pt | 0 pt | 12 pt |
+| 0 pt | 32 pt | 32 pt |
+| 6 pt | 26 pt | 32 pt |
+| 32 pt | 0 pt | 32 pt |
 | 34 pt | 0 pt | 34 pt |
 
 The scroll view extends to the sheet edge and lets UIKit adjust its content insets. The custom detent excludes the bottom safe area; UIKit adds that area when the sheet is edge-attached. Only the remaining design padding enters the content-height calculation. A frame pinned to the bottom safe-area guide gives the same final-control position. See [Apple's custom-detent contract](https://developer.apple.com/documentation/uikit/uisheetpresentationcontroller/detent/custom(identifier:resolver:)).
@@ -74,7 +74,16 @@ The enum cases and raw values remain unchanged so existing switches still compil
 
 ## iPhone Duo and demo checks
 
-On iOS 27 and later, the sheet requests trailing placement for the vertical Book fold. A tall native sheet can span a horizontal fold. The removed custom presenter selected one clear region; native sheets now use UIKit placement. A short viewport test proves scrolling and action reachability, but it does not simulate a physical fold.
+The sheet keeps UIKit's automatic placement and leaves `sourceView` unset. A floating sheet centers in a flat window. UIKit moves native sheets away from an active fold and chooses the side; the framework does not force a left or right edge. See [Apple's Duo sheet guidance](https://developer.apple.com/videos/play/tech-talks/111466/) and [the source-view placement contract](https://developer.apple.com/documentation/uikit/uisheetpresentationcontroller/sourceview). A tall native sheet can span a horizontal fold. A short viewport test proves scrolling and action reachability, but it does not simulate a physical fold.
+
+```mermaid
+flowchart TD
+    Sheet[Native sheet: automatic placement, no source view] --> UIKit[UIKit reads the presenting window and fold]
+    UIKit -->|Flat window| Center[Center the floating sheet]
+    UIKit -->|Active fold| Side[Move the sheet away from the fold; system chooses the side]
+    Center --> Content[Measure content with the local safe area]
+    Side --> Content
+```
 
 Give custom item content flexible horizontal constraints and a complete vertical layout. Collections must invalidate width-dependent cell sizes when their bounds change. Both demo galleries recalculate cells after width changes. The nine-photo grid uses the outer scroll view so its rows and actions share one scroll path.
 
@@ -86,7 +95,7 @@ Use the demo's **Bulletins** menu and the framework's **Page Size Transitions** 
 4. Start loading, change the current page, and open an alert above the sheet. Loading must block interactive dismissal; closing the alert must retain the bulletin.
 5. Scroll Pet Care Guide and Pet Photos to their final actions. Resize each gallery.
 6. Check light and dark mode over a busy background. Check Close in right-to-left layout.
-7. On a working Duo runtime, check the vertical Book fold and horizontal partial fold. Scroll through tall content and reach every action.
+7. On a working Duo runtime, check centered placement when flat, then fold and unfold with the sheet open. Check the vertical Book fold and horizontal partial fold in both orientations. Verify that the sheet avoids the fold and keeps edited values. Check matching top and bottom gaps in a floating sheet without a Close header. Scroll through tall content and reach every action.
 8. Dismiss and reopen. Repeat on an older supported runtime.
 
 See [Framework previews](Framework%20Previews.md) and [Testing](../Tests/TESTING.md).

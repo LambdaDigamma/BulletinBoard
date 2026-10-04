@@ -47,7 +47,7 @@ let manager = BLTNItemManager(rootItem: item)
 manager.showBulletin(above: self)
 ```
 
-The content background adapts to light and dark mode. On iOS 26.1 and later, the sheet also replaces the system glass surface with a solid background. On iOS 27 and later, it requests trailing placement for the Book posture. Tall native sheets can span a horizontal fold; content and actions remain scrollable.
+The content background adapts to light and dark mode. On iOS 26.1 and later, the sheet also replaces the system glass surface with a solid background. UIKit uses automatic placement: a floating sheet centers in a flat window and moves away from an active fold. UIKit chooses the side. Floating sheets without a Close header keep matching 32-point top and bottom content gaps. The bottom safe area supplies that clearance first. Tall native sheets can span a horizontal fold; content and actions remain scrollable.
 
 The custom presenter was removed. `presentationStyle`, `backgroundColor`, `backgroundViewStyle`, `edgeSpacing`, `cardCornerRadius`, and `shouldRespondToKeyboardChanges` remain as deprecated compatibility settings and have no effect. UIKit controls sheet appearance and placement. See [Adaptive layout](guides/Adaptive%20Layout.md) for behavior, migration details, and validation.
 

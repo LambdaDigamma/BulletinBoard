@@ -102,7 +102,8 @@ final class NativeSheetLayoutTests: XCTestCase {
         for insets in [UIEdgeInsets.zero,
                        UIEdgeInsets(top: 0, left: 8, bottom: 6, right: 32),
                        UIEdgeInsets(top: 0, left: 32, bottom: 30, right: 8),
-                       UIEdgeInsets(top: 0, left: 8, bottom: 12, right: 32),
+                       UIEdgeInsets(top: 0, left: 8, bottom: 32, right: 32),
+                       UIEdgeInsets(top: 0, left: 32, bottom: 40, right: 8),
                        UIEdgeInsets.zero] {
             controller.additionalSafeAreaInsets = insets
             layout(fixture)
@@ -113,12 +114,14 @@ final class NativeSheetLayoutTests: XCTestCase {
             let frame = action.convert(action.bounds, to: controller.view)
             let safeFrame = controller.view.safeAreaLayoutGuide.layoutFrame
             switch insets.bottom {
-            case 30, 12:
+            case 40, 32:
                 XCTAssertEqual(safeFrame.maxY, frame.maxY, accuracy: 1, "Use system clearance without an extra margin")
+            case 30:
+                XCTAssertEqual(safeFrame.maxY - frame.maxY, 2, accuracy: 1, "Complete the inset to match the top gap")
             case 6:
-                XCTAssertEqual(safeFrame.maxY - frame.maxY, 6, accuracy: 1, "Complete the small inset to 12 points")
+                XCTAssertEqual(safeFrame.maxY - frame.maxY, 26, accuracy: 1, "Complete the small inset to match the top gap")
             default:
-                XCTAssertEqual(controller.view.bounds.maxY - frame.maxY, 12, accuracy: 1, "Retain clearance without a system inset")
+                XCTAssertEqual(controller.view.bounds.maxY - frame.maxY, 32, accuracy: 1, "Retain clearance without a system inset")
             }
             XCTAssertLessThanOrEqual(frame.maxY, safeFrame.maxY + 1)
             XCTAssertGreaterThanOrEqual(frame.minX, safeFrame.minX)
@@ -141,14 +144,14 @@ final class NativeSheetLayoutTests: XCTestCase {
         let originalHeight = controller.measuredContentHeight
 
         controller.beginItemTransition(animated: false)
-        controller.additionalSafeAreaInsets.bottom = 30
+        controller.additionalSafeAreaInsets.bottom = 40
         layout(fixture)
         XCTAssertEqual(controller.measuredContentHeight, originalHeight, accuracy: 0.5)
         var displayed = false
         controller.finishItemTransition(willDisplay: { true }, completion: { displayed = true })
         layout(fixture)
         XCTAssertTrue(displayed)
-        XCTAssertEqual(controller.measuredContentHeight, originalHeight - 12, accuracy: 0.5)
+        XCTAssertEqual(controller.measuredContentHeight, originalHeight - 32, accuracy: 0.5)
 
         let loadingHeight = controller.measuredContentHeight
         controller.displayActivityIndicator(color: .label)
@@ -162,7 +165,7 @@ final class NativeSheetLayoutTests: XCTestCase {
         scroll.setContentOffset(CGPoint(x: 0, y: scroll.contentSize.height - scroll.bounds.height), animated: false)
         layout(fixture)
         let frame = action.convert(action.bounds, to: controller.view)
-        XCTAssertEqual(controller.view.bounds.maxY - frame.maxY, 12, accuracy: 1)
+        XCTAssertEqual(controller.view.bounds.maxY - frame.maxY, 32, accuracy: 1)
         XCTAssertEqual(controller.contentStackView.alpha, 1)
     }
 

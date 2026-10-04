@@ -1,6 +1,6 @@
 # Papercuts
 
-Reviewed on 2026-10-03. Status below separates current source issues from historical environment observations. Build checks do not confirm live preview or fold behavior.
+Reviewed on 2026-10-04. Status below separates current source issues from historical environment observations. Build checks do not confirm live preview or fold behavior.
 
 ## Favorite pets use two storage keys
 
@@ -42,13 +42,23 @@ Impact before the fix: enabling `ENABLE_MODULE_VERIFIER = YES` for `CustomBullet
 
 The demo has Swift clients only. `CustomBulletins` now exports its Swift module without a Clang module (`DEFINES_MODULE = NO`) or public generated Objective-C header (`SWIFT_INSTALL_OBJC_HEADER = NO`). Its Clang module verifier stays disabled. The standalone `BLTNBoard` framework keeps module verification enabled. See [Apple's build settings reference](https://developer.apple.com/documentation/xcode/build-settings-reference) for the generated-header setting.
 
-## iOS 27.1 runtime is listed but cannot boot Duo
+## iOS 27.1 Duo runtime recovery
 
-Status: needs a boot check with a valid runtime. The review still sees iOS 27.1 build 24A94401 listed as available. That metadata does not prove that it can boot. No boot, reinstall, or runtime replacement was attempted during this review.
+Status: recovered for the existing Duo on 2026-10-04. CoreSimulator reports device `437E9AC5-3FCD-4E83-ABAB-102A12698D4C` as Booted, and Xcode 27.1 reports Moers running on that device. The old runtime-path failure is a historical observation. A fresh test Duo was created, but its boot and current fold behavior remain unconfirmed. The existing Moers run was preserved.
 
 Impact at the last boot check: the Duo simulator could not start, so final fold checks remain pending. On 2026-10-03, CoreSimulator listed iOS 27.1 build 24A94401 as Ready and its mounted bundle existed, but `simctl boot 437E9AC5-3FCD-4E83-ABAB-102A12698D4C` failed with SimError401, “runtime path not found”. The runtime signature check failed with error -67054, “a sealed resource is missing or invalid”.
 
 A targeted runtime unmount and scan-and-mount completed but did not fix boot. The Duo stayed shut down; no simulator data was erased and no shared service was restarted. Xcode could not download either the arm64-only or universal iOS 27.1 runtime. Obtain a valid compatible runtime installer before replacing the existing runtime.
+
+## Isolated Duo placement check needs an unlocked Mac
+
+Status: open. Native placement and equal floating-sheet gaps pass hosted checks, but the current Duo visual check is incomplete.
+
+Impact: the checks confirm centered placement in a flat iPad window, but cannot confirm which side UIKit selects during a real partial Duo fold.
+
+Reproduction on 2026-10-04: create a separate iOS 27.1 Duo named **BulletinBoard Placement Duo 2026-10-04** and open `BulletinBoard.xcworkspace` in a separate Xcode 27.2 window. The new device is `DE4B3376-7D13-4E36-BF62-7D5625FBAC94`. Automatic approval review rejected the isolated demo build because it retained an earlier wait-before-build instruction and did not accept the later main-agent release of that hold. No demo build or installation ran. A later read-only computer-use call reported a locked Mac. A capture-only DeviceInteraction call reported `Session not found`.
+
+Unlock the Mac and confirm the isolated build and run, then check flat, Book, and horizontal partial-fold placement with the sheet open. The separate device and Xcode window remain available. No command changed the original Moers app, destination, posture, or data.
 
 ## Xcode UIKit live preview reports presentation without showing the modal
 

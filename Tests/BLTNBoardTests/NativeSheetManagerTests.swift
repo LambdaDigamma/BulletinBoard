@@ -440,10 +440,10 @@ final class NativeSheetManagerTests: XCTestCase {
         let originalFrame = button.convert(button.bounds, to: controller.view)
         let safeFrame = controller.view.safeAreaLayoutGuide.layoutFrame
         XCTAssertLessThanOrEqual(originalFrame.maxY, safeFrame.maxY + 1)
-        if controller.view.safeAreaInsets.bottom >= 12 {
+        if controller.view.safeAreaInsets.bottom >= 32 {
             XCTAssertEqual(safeFrame.maxY, originalFrame.maxY, accuracy: 1)
         } else {
-            XCTAssertEqual(controller.view.bounds.maxY - originalFrame.maxY, 12, accuracy: 1)
+            XCTAssertEqual(controller.view.bounds.maxY - originalFrame.maxY, 32, accuracy: 1)
         }
 
         let scroll = controller.contentScrollView
@@ -465,7 +465,7 @@ final class NativeSheetManagerTests: XCTestCase {
         await dismiss(manager)
     }
 
-    func testFloatingSheetRetainsMinimumBottomClearance() async throws {
+    func testFloatingSheetUsesAutomaticPlacementAndEqualVerticalClearance() async throws {
         let (window, parent) = try makePresenter()
         defer { removePresenter(window) }
         guard parent.traitCollection.horizontalSizeClass == .regular else {
@@ -480,10 +480,27 @@ final class NativeSheetManagerTests: XCTestCase {
         let controller = try XCTUnwrap(manager.presentationController as? NativeBulletinViewController)
         let button = try XCTUnwrap(page.actionButton)
         layout(controller)
+        let sheet = try XCTUnwrap(controller.sheetPresentationController)
+        if #available(iOS 27.0, *) {
+            XCTAssertEqual(sheet.preferredPlacement, .automatic)
+        }
+        XCTAssertNil(sheet.sourceView)
+        var hasActiveDivision = false
+        if #available(iOS 27.1, *) {
+            hasActiveDivision = !parent.view.reservedRegions(kind: .division).isEmpty
+        }
+        if !hasActiveDivision {
+            let presentedFrame = controller.view.convert(controller.view.bounds, to: parent.view)
+            XCTAssertEqual(presentedFrame.midX, parent.view.bounds.midX, accuracy: 1,
+                           "Let UIKit center the floating sheet without a forced side")
+        }
         XCTAssertEqual(controller.view.safeAreaInsets.bottom, 0)
         XCTAssertEqual(controller.contentScrollView.adjustedContentInset.bottom, 0)
+        let firstContent = try XCTUnwrap(controller.contentStackView.arrangedSubviews.first)
+        let firstFrame = firstContent.convert(firstContent.bounds, to: controller.view)
         let frame = button.convert(button.bounds, to: controller.view)
-        XCTAssertEqual(controller.view.bounds.maxY - frame.maxY, 12, accuracy: 1)
+        XCTAssertEqual(firstFrame.minY - controller.view.bounds.minY, 32, accuracy: 1)
+        XCTAssertEqual(controller.view.bounds.maxY - frame.maxY, 32, accuracy: 1)
         let hit = controller.view.hitTest(CGPoint(x: frame.midX, y: frame.midY), with: nil)
         XCTAssertTrue(hit?.isDescendant(of: button) == true)
         await dismiss(manager)
