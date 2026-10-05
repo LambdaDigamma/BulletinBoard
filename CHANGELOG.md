@@ -2,7 +2,7 @@
 ## Unreleased
 
 ### New Features
-- Use native UIKit sheets on every supported release, from iOS 17. Keep one content-height stop and scroll long content. Request trailing placement on iOS 27 and use a solid adaptive sheet surface on iOS 26.1 and later.
+- Use native UIKit sheets on every supported release, from iOS 17. Keep one content-height stop and scroll long content. Use a solid adaptive sheet surface on iOS 26.1 and later.
 - Add seven debug-only framework Xcode previews for page-size transitions, actions, alerts, forms, loading, push/pop, scrolling, large text, dark mode, and right-to-left layout. Keep the fixtures independent of the demo app.
 - Animate sheet height during page changes and fade content out and in. Apply changes directly with Reduce Motion. Cancel stale transitions after a new page, loading, or dismissal.
 - Let the startup loading indicator adapt to light and dark mode.
@@ -10,7 +10,9 @@
 ### Fixes
 - Use UIKit's navigation-bar Close item with standard appearance, accessibility, and interaction. Keep scrolling content below its fixed header.
 - Preserve controls and values during loading, show the spinner immediately if loading interrupts a fade, and clean up each active item once after dismissal.
-- Replace fixed bottom padding with a 12-point minimum total clearance. Use UIKit safe-area clearance first and add only the remaining padding.
+- Keep UIKit's automatic sheet placement. Center floating sheets in flat windows and let UIKit choose placement away from an active fold.
+- Disable the bulletin's vertical bar on iOS 27.1 and later. Keep horizontal bars across pages and loading, and let the remaining local safe area protect text and controls.
+- Match the 32-point top and bottom content gaps in floating sheets without a Close header. Use UIKit safe-area clearance first and add only the remaining bottom padding.
 - Adapt demo controls and galleries to live width changes.
 - Fix the demo framework build settings for its Swift-only dependencies.
 

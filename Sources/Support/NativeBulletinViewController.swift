@@ -33,7 +33,7 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
     private var outgoingSnapshot: UIView?
 
     private static let contentDetentIdentifier = UISheetPresentationController.Detent.Identifier("bulletinContent")
-    private static let minimumBottomClearance: CGFloat = 12
+    private static let contentVerticalClearance: CGFloat = 32
 
     init() {
         super.init(nibName: nil, bundle: nil)
@@ -73,9 +73,6 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
             },
         ]
         sheet.selectedDetentIdentifier = Self.contentDetentIdentifier
-        if #available(iOS 27.0, *) {
-            sheet.preferredPlacement = .trailing
-        }
     }
 
     override func loadView() {
@@ -105,9 +102,10 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
         contentWidthConstraint.isActive = true
         contentScrollView.addSubview(contentStackView)
         contentStackView.spacing = 24
-        stackTopConstraint = contentStackView.topAnchor.constraint(equalTo: contentScrollView.contentLayoutGuide.topAnchor, constant: 32)
+        stackTopConstraint = contentStackView.topAnchor.constraint(equalTo: contentScrollView.contentLayoutGuide.topAnchor,
+                                                                  constant: Self.contentVerticalClearance)
         stackBottomConstraint = contentStackView.bottomAnchor.constraint(equalTo: contentScrollView.contentLayoutGuide.bottomAnchor,
-                                                                        constant: -Self.minimumBottomClearance)
+                                                                        constant: -Self.contentVerticalClearance)
         NSLayoutConstraint.activate([
             contentStackView.leadingAnchor.constraint(equalTo: contentScrollView.contentLayoutGuide.leadingAnchor, constant: 24),
             contentStackView.trailingAnchor.constraint(equalTo: contentScrollView.contentLayoutGuide.trailingAnchor, constant: -24),
@@ -187,7 +185,7 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
 
     private func updateBottomClearance() {
         // The safe area supplies the clearance when it is large enough.
-        let padding = max(0, Self.minimumBottomClearance - contentContainer.safeAreaInsets.bottom)
+        let padding = max(0, Self.contentVerticalClearance - contentContainer.safeAreaInsets.bottom)
         guard stackBottomConstraint.constant != -padding else { return }
         stackBottomConstraint.constant = -padding
         view.setNeedsLayout()
@@ -354,7 +352,7 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
         reservesCloseButton = isRequired
         updateContentVisibility()
         if isViewLoaded {
-            stackTopConstraint.constant = isRequired ? 0 : 32
+            stackTopConstraint.constant = isRequired ? 0 : Self.contentVerticalClearance
             updateHeaderHeight()
             view.setNeedsLayout()
         }
@@ -401,6 +399,12 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
     @objc private func closeButtonTapped() {
         guard isDismissable && !isTransitioningItem && !isDisplayingActivityIndicator else { return }
         manager?.dismissBulletin(animated: true)
+    }
+
+    @available(iOS 27.1, *)
+    override var preferredVerticalBarBehavior: UIVerticalBarBehavior {
+        // Bulletins have at most one bar control; keep their horizontal layout.
+        .disabled
     }
 
     override var preferredStatusBarStyle: UIStatusBarStyle {
