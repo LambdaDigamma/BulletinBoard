@@ -11,6 +11,7 @@
 - Use UIKit's navigation-bar Close item with standard appearance, accessibility, and interaction. Keep scrolling content below its fixed header.
 - Preserve controls and values during loading, show the spinner immediately if loading interrupts a fade, and clean up each active item once after dismissal.
 - Keep UIKit's automatic sheet placement. Center floating sheets in flat windows and let UIKit choose placement away from an active fold.
+- Disable the bulletin's vertical bar on iOS 27.1 and later. Keep horizontal bars across pages and loading, and let the remaining local safe area protect text and controls.
 - Match the 32-point top and bottom content gaps in floating sheets without a Close header. Use UIKit safe-area clearance first and add only the remaining bottom padding.
 - Adapt demo controls and galleries to live width changes.
 - Fix the demo framework build settings for its Swift-only dependencies.

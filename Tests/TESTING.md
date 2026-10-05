@@ -46,6 +46,8 @@ Repeat these focused tests on an older runtime. Every supported release uses the
 
 Use the framework Page Size Transitions preview and demo for visual checks. Sampled intermediate heights prove runtime sheet movement; they do not prove visual quality, Reduce Motion settings, software-keyboard behavior, or fold placement. Check these separately. Native placement stays automatic. Check a centered floating sheet in a flat Duo window and the system's placement as the device folds and unfolds. A tall native sheet can span a horizontal fold.
 
+`testSheetKeepsHorizontalBarsAcrossPagesAndLoading` checks the bulletin's `.disabled` preference on iOS 27.1 and later through push, pop, loading, and dismissal, while the presenting controller keeps its original preference. It skips on older releases. `testHorizontalSafeAreaIsAppliedOnceAndReleasesWidthWhenInsetsClear` checks changing asymmetric side insets in both layout directions: the background fills the sheet, the scroll frame uses the safe area once, the stack adds only its 24-point side margins, and content width returns when the inset clears. On Duo, also check the actual bar axis, status-bar placement, camera clearance, and final-action reachability before and after dismissal.
+
 ## Xcode project checks
 
 The standalone framework target uses the synchronized `Sources` folder. New Swift files in that folder join the target without manual source references. The demo uses the local Swift package and imports `CustomBulletins` as a Swift module. `CustomBulletins` has no Clang module or public generated Objective-C header; its Clang module verifier is disabled. The standalone framework keeps module verification enabled.

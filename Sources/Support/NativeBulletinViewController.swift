@@ -401,6 +401,12 @@ final class NativeBulletinViewController: UIViewController, BulletinPresentation
         manager?.dismissBulletin(animated: true)
     }
 
+    @available(iOS 27.1, *)
+    override var preferredVerticalBarBehavior: UIVerticalBarBehavior {
+        // Bulletins have at most one bar control; keep their horizontal layout.
+        .disabled
+    }
+
     override var preferredStatusBarStyle: UIStatusBarStyle {
         manager?.statusBarAppearance == .lightContent ? .lightContent : .default
     }

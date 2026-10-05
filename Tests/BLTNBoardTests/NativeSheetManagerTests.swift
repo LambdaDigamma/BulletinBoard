@@ -28,6 +28,37 @@ final class NativeSheetManagerTests: XCTestCase {
         await dismiss(manager)
     }
 
+    func testSheetKeepsHorizontalBarsAcrossPagesAndLoading() async throws {
+        guard #available(iOS 27.1, *) else {
+            throw XCTSkip("Vertical bar preferences require iOS 27.1")
+        }
+        let (window, parent) = try makePresenter()
+        defer { removePresenter(window) }
+        let originalPreference = parent.preferredVerticalBarBehavior
+        let root = NativeSheetTrackingItem(contentHeight: 100)
+        root.requiresCloseButton = false
+        let next = NativeSheetTrackingItem(contentHeight: 300)
+        next.requiresCloseButton = true
+        let manager = nativeManager(root)
+        await show(manager, above: parent)
+        let controller = try XCTUnwrap(manager.presentationController as? NativeBulletinViewController)
+        XCTAssertEqual(controller.preferredVerticalBarBehavior, .disabled)
+
+        await changePage(to: next) { manager.push(item: next) }
+        XCTAssertEqual(controller.preferredVerticalBarBehavior, .disabled)
+        manager.displayActivityIndicator()
+        XCTAssertEqual(controller.preferredVerticalBarBehavior, .disabled)
+        manager.hideActivityIndicator()
+        XCTAssertEqual(controller.preferredVerticalBarBehavior, .disabled)
+        await changePage(to: root) { manager.popItem() }
+        XCTAssertEqual(controller.preferredVerticalBarBehavior, .disabled)
+        XCTAssertEqual(parent.preferredVerticalBarBehavior, originalPreference)
+
+        await dismiss(manager)
+        XCTAssertNil(parent.presentedViewController)
+        XCTAssertEqual(parent.preferredVerticalBarBehavior, originalPreference)
+    }
+
     func testLoadingKeepsHeightControlsAndValuesAndRestoresDismissal() async throws {
         let (window, parent) = try makePresenter()
         defer { removePresenter(window) }

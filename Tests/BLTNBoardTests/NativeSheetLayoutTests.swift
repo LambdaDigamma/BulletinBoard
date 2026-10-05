@@ -89,6 +89,45 @@ final class NativeSheetLayoutTests: XCTestCase {
         XCTAssertTrue(hitView?.isDescendant(of: action) == true)
     }
 
+    func testHorizontalSafeAreaIsAppliedOnceAndReleasesWidthWhenInsetsClear() throws {
+        let text = UILabel()
+        text.numberOfLines = 0
+        text.text = String(repeating: "Keep content inside the current safe area. ", count: 12)
+        let fixture = makeFixture(size: CGSize(width: 470, height: 600), content: [text])
+        defer { removeFixture(fixture) }
+        let controller = fixture.controller
+        let originalWidth = controller.contentStackView.bounds.width
+
+        for direction in [UITraitEnvironmentLayoutDirection.leftToRight, .rightToLeft] {
+            controller.traitOverrides.layoutDirection = direction
+            for insets in [UIEdgeInsets.zero,
+                           UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 84),
+                           UIEdgeInsets(top: 0, left: 84, bottom: 0, right: 0),
+                           UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 84),
+                           UIEdgeInsets(top: 0, left: 84, bottom: 0, right: 8),
+                           UIEdgeInsets.zero] {
+                controller.additionalSafeAreaInsets = insets
+                layout(fixture)
+                let container = controller.contentContainer
+                let safeFrame = container.safeAreaLayoutGuide.layoutFrame
+                let scroll = controller.contentScrollView
+                XCTAssertEqual(container.frame, controller.view.bounds, "The background fills the sheet")
+                XCTAssertEqual(scroll.frame.minX, safeFrame.minX, accuracy: 0.5)
+                XCTAssertEqual(scroll.frame.maxX, safeFrame.maxX, accuracy: 0.5)
+                XCTAssertEqual(scroll.adjustedContentInset.left, 0, accuracy: 0.5)
+                XCTAssertEqual(scroll.adjustedContentInset.right, 0, accuracy: 0.5)
+
+                let contentFrame = controller.contentStackView.convert(controller.contentStackView.bounds, to: container)
+                XCTAssertEqual(contentFrame.minX - safeFrame.minX, 24, accuracy: 0.5)
+                XCTAssertEqual(safeFrame.maxX - contentFrame.maxX, 24, accuracy: 0.5)
+                XCTAssertEqual(contentFrame.width, safeFrame.width - 48, accuracy: 0.5)
+                if insets == .zero {
+                    XCTAssertEqual(contentFrame.width, originalWidth, accuracy: 0.5)
+                }
+            }
+        }
+    }
+
     func testFinalActionKeepsBottomClearanceAsLocalSafeAreaChanges() throws {
         let content = UIView()
         content.heightAnchor.constraint(equalToConstant: 900).isActive = true
